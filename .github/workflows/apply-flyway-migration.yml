@@ -1,0 +1,116 @@
+name: Run Flyway Migrations against Databricks Environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      DBX_ENV:
+        required: true
+        type: string
+        description: "Databricks environment to run action on/in"
+        default: "dev"
+      VAULT_PATH:
+        required: true
+        type: string
+        description: "path to vault secrets"
+        default: concourse/data-e-commerce/databricks/non-prod
+      CONNECTION_CATALOG:
+        required: true
+        type: string
+        description: "catalog action will be run on/in"
+        default: "dev_ent_bronze_db"
+      MIGRATION_PATH:
+        required: true
+        type: string
+        description: "path to migrations"
+        default: flyway/bronze/sql
+      DEFAULT_SCHEMA:
+        required: true
+        type: string
+        description: "The default schema where the flyway history table is installed. If schema is not qualified on tables in migration scripts, this will also be the schema where your tables are created."
+      BASELINE_VERSION:
+        required: true
+        type: number
+        description: "The baseline version to apply to the migration."
+      OSO_SILVER_CATALOG:
+        required: true
+        type: string
+        description: "The default OSO silver catalog used for view creation."
+
+  workflow_call:
+    inputs:
+      DBX_ENV:
+        required: true
+        type: string
+      VAULT_PATH:
+        required: true
+        type: string
+      CONNECTION_CATALOG:
+        required: true
+        type: string
+      MIGRATION_PATH:
+        required: true
+        type: string
+      DEFAULT_SCHEMA:
+        required: true
+        type: string
+      BASELINE_VERSION:
+        required: true
+        type: number
+      OSO_SILVER_CATALOG:
+        required: true
+        type: string
+
+env:
+  PYTHON_VERSION: "3.12.4"
+
+jobs:
+  migrate:
+    name: "Migrate Schema"
+    runs-on: [self-hosted, azure]
+    steps:
+      - name: "Vault: Get Databricks Secrets"
+        uses: hashicorp/vault-action@v3
+        with:
+          url: https://vault.tools.dcsg.com
+          method: approle
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+          secrets: |
+            ${{inputs.VAULT_PATH}} clientId | SP_CLIENT_ID;
+            ${{inputs.VAULT_PATH}} clientSecret | SP_CLIENT_SECRET;
+            ${{inputs.VAULT_PATH}} tenantId | SP_TENANT_ID;
+            ${{inputs.VAULT_PATH}} activeDirectoryEndpointUrl | SP_OAUTH_HOST;
+            ${{inputs.VAULT_PATH}} oauthScope | SP_OAUTH_SCOPE;
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Upgrade PIP
+        run: python -m pip install --upgrade pip
+
+      - name: Install Devops Packages
+        run: pip install requests
+
+      - name: Set JDBC Access Token
+        run: python flyway/devops/set_jdbc_access_token.py
+
+      - name: Run Flyway Migrations
+        run: |
+          docker run --pull=always --rm \
+          --volume ${{github.workspace}}/${{inputs.MIGRATION_PATH}}:/flyway/sql:ro \
+          --volume ${{github.workspace}}/flyway/conf:/flyway/conf:ro \
+          -e JDBC_ACCESS_TOKEN=${{ env.JDBC_ACCESS_TOKEN }} \
+          -e CONNECTION_CATALOG=${{ inputs.CONNECTION_CATALOG }} \
+          -e FLYWAY_PLACEHOLDERS_OSO_SILVER_CATALOG=${{inputs.OSO_SILVER_CATALOG}} \
+          redgate/flyway:12.1.1 migrate \
+          -environment="${{inputs.DBX_ENV}}" \
+          -baselineOnMigrate="true" \
+          -baselineVersion=${{inputs.BASELINE_VERSION}} \
+          -defaultSchema="${{inputs.DEFAULT_SCHEMA}}"

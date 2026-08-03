@@ -1,0 +1,20 @@
+variables:
+
+  vs_kafka_topic:
+    default: ecmde-vector-search
+  vs_schema_key_subject:
+    default: ecmde-vector-search-key
+  vs_schema_value_subject:
+    default: ecmde-vector-search-value
+
+  vs_source_catalog:
+    default: "dev_datasci_db"
+  vs_source_schema:
+    default: "ecm_search_retrieval_vector_search"
+
+  vs_watermark_source_catalog:
+    default: "kafka"
+  vs_watermark_source_schema:
+    default: "ecmde"
+  common_schema:
+    default: "common"

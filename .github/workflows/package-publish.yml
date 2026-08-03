@@ -1,0 +1,56 @@
+name: Package Module and Publish to Nexus
+
+on:
+  push:
+    tags:
+      - "prod_module_v*"
+
+env:
+  PYTHON_VERSION: '3.12.4'
+  PYPI_REPOSITORY_URL: 'https://nexus.tools.dcsg.com/repository/data-ecomm-pypi/'
+
+jobs:
+  build-and-test:
+    uses: ./.github/workflows/build-test.yml
+    secrets: inherit
+
+  deploy-package:
+    name: Deploy Package to Nexus
+    runs-on: [self-hosted, azure]
+    needs: [build-and-test]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK.
+        uses: actions/setup-java@v4.2.2
+        with:
+          java-version: 11
+          distribution: 'temurin'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install distribution packages
+        run: pip install build twine
+
+      - name: Build wheel
+        run: python -m build
+
+      - name: Get Nexus service account
+        uses: hashicorp/vault-action@v3
+        with:
+          url: https://vault.tools.dcsg.com
+          method: approle
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+          tlsSkipVerify: true
+          secrets: |
+            concourse/data-e-commerce/nexus username | NEXUS_USER;
+            concourse/data-e-commerce/nexus password | NEXUS_PWD;
+
+      - name: Push to Nexus
+        run: |
+          twine upload dist/* --repository-url ${{ env.PYPI_REPOSITORY_URL }} --verbose --username ${{ env.NEXUS_USER }} --password ${{ env.NEXUS_PWD }}

@@ -1,0 +1,69 @@
+resources:
+  jobs:
+    ecmde-search-vector-search-egress:
+      name: "ecmde-search-vector-search-egress"
+
+      tags:
+        job-type: "kafka-publish"
+        job-group: "search"
+        version: ${var.bundle_version}
+
+      permissions:
+        - group_name: ${var.admin_group_name}
+          level: CAN_MANAGE
+        - group_name: ${var.eng_group_name}
+          level: CAN_MANAGE_RUN
+        - service_principal_name: ${var.data_platform_sp_id}
+          level: CAN_MANAGE_RUN
+        - group_name: ${var.l2_support_group_name}
+          level: CAN_MANAGE_RUN
+
+      job_clusters:
+        - job_cluster_key: dbx-to-kafka
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            apply_policy_default_values: false
+            policy_id: ${var.job_cluster_policy_id}
+            instance_pool_id: ${var.instance_pool_id}
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+            data_security_mode: USER_ISOLATION
+            runtime_engine: STANDARD
+            autoscale:
+              min_workers: 5
+              max_workers: 10
+            spark_conf:
+              workspace_path_prefix: ${var.workspace_path_prefix}
+            custom_tags: # Tag on DKS Job compute (Mandatory)
+              TEAM_CODE: ${var.team_code}
+
+      tasks:
+        - task_key: publish-vector-search
+          job_cluster_key: dbx-to-kafka
+          libraries:
+            - whl: ../../dist/*.whl
+            - maven:
+                coordinates: "org.apache.spark:spark-avro_2.12:3.5.4"
+            - maven:
+                coordinates: "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4"
+            - maven:
+                coordinates: "org.apache.kafka:kafka-clients:3.5.2"
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/search/notebooks/vector_search_dbx_to_kafka_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              dbx_watermark_table_name: ${var.ecomp_catalog}.${var.common_schema}.watermarks
+              dbx_watermark_catalog_name: ${var.vs_watermark_source_catalog}
+              dbx_watermark_schema_name: ${var.vs_watermark_source_schema}
+              kafka_bootstrap_servers: ${var.kafka_bootstrap_servers}
+              kafka_fail_on_data_loss: ${var.kafka_fail_on_data_loss}
+              kafka_session_timeout_ms: ${var.kafka_session_timeout_ms}
+              kafka_schema_registry_url: ${var.kafka_schema_registry_url}
+              kafka_jaas_config_secret_key: ${var.kafka_jaas_config_secret_key}
+              kafka_schema_registry_user_key: ${var.kafka_schema_registry_user_key}
+              kafka_schema_registry_password_key: ${var.kafka_schema_registry_password_key}
+              kafka_schema_registry_key_subject: ${var.vs_schema_key_subject}
+              kafka_schema_registry_value_subject: ${var.vs_schema_value_subject}
+              kafka_publish_topic: ${var.vs_kafka_topic}
+              kafka_publish_source_table_name: ${var.vs_source_catalog}.${var.vs_source_schema}.llm_descriptions_dsg

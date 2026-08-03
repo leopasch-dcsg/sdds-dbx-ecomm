@@ -1,0 +1,91 @@
+resources:
+  jobs:
+    ecmde-ecomp-bq-exec-sproc:
+      name: ecmde-ecomp-bq-exec-sproc
+
+      tags:
+        job-group: "bq_exec"
+        version: ${var.bundle_version}
+
+      permissions:
+        - group_name: ${var.admin_group_name}
+          level: CAN_MANAGE
+        - group_name: ${var.eng_group_name}
+          level: CAN_MANAGE_RUN
+        - group_name: ${var.l2_support_group_name}
+          level: CAN_MANAGE_RUN
+        - service_principal_name: ${var.data_platform_sp_id}
+          level: CAN_MANAGE_RUN
+
+      max_concurrent_runs: 50
+
+
+      parameters:
+        - name: azure_kv_scope
+          default: ${var.azure_kv_scope}
+        - name: bq_credentials_json_credentials_key
+          default: ${var.bq_credentials_json_credentials_key}
+        - name: bq_parent_project_id
+          default: ${var.bq_destination_parent_project_id}
+        - name: bq_project_id
+          default: ${var.bq_destination_project_id}
+        - name: bq_dataset
+          default: ${var.bq_destination_dataset}
+
+
+        - name: bq_proc_fqn
+          default: ""
+        - name: pjob_id
+          default: ""
+        - name: table_key
+          default: ""
+
+      job_clusters:
+        - job_cluster_key: bq-exec-sproc-cluster
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            apply_policy_default_values: false
+            policy_id: ${var.job_cluster_policy_id}
+            instance_pool_id: ${var.instance_pool_id}
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+            data_security_mode: USER_ISOLATION
+            runtime_engine: STANDARD
+            autoscale:
+              min_workers: 2
+              max_workers: 4
+            spark_conf:
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              spark.hadoop.google.cloud.auth.service.account.enable: true
+              spark.hadoop.fs.gs.project.id: ${var.bq_credentials_project_id}
+              spark.hadoop.fs.gs.auth.service.account.private.key.id: "{{secrets/kv-dsg-ecmde-dbx/bq-sa-ecmde-sbox-private-key-id}}"
+              spark.hadoop.fs.gs.auth.service.account.private.key: "{{secrets/kv-dsg-ecmde-dbx/bq-sa-ecmde-sbox-private-key}}"
+              spark.hadoop.fs.gs.auth.service.account.email: "{{secrets/kv-dsg-ecmde-dbx/bq-sa-ecmde-sbox-client-email}}"
+              spark.sql.adaptive.enabled: "true"
+              spark.sql.adaptive.coalescePartitions.enabled: "true"
+              spark.sql.adaptive.skewJoin.enabled: "true"
+              spark.sql.files.maxPartitionBytes: "268435456"
+              spark.sql.shuffle.partitions: "auto"
+              spark.databricks.io.cache.enabled: "true"
+            custom_tags:
+              TEAM_CODE: ${var.team_code}
+
+      tasks:
+        - task_key: bq-exec-sproc-task
+          max_retries: 1
+          job_cluster_key: bq-exec-sproc-cluster
+          libraries:
+            - whl: ../../dist/*.whl
+          python_wheel_task:
+            package_name: ecmde_ecomm
+            entry_point: ecmde-ecomp-bq-exec-sproc
+            named_parameters:
+              azure_kv_scope: "{{job.parameters.azure_kv_scope}}"
+              bq_credentials_json_credentials_key: "{{job.parameters.bq_credentials_json_credentials_key}}"
+              bq_parent_project_id: "{{job.parameters.bq_parent_project_id}}"
+              bq_project_id: "{{job.parameters.bq_project_id}}"
+              bq_dataset: "{{job.parameters.bq_dataset}}"
+              bq_proc_fqn: "{{job.parameters.bq_proc_fqn}}"
+              pjob_id: "{{job.parameters.pjob_id}}"
+              table_key: "{{job.parameters.table_key}}"

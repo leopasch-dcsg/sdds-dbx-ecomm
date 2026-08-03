@@ -1,0 +1,1 @@
+ALTER TABLE ${ecom_schema}.stg_oso_order_sku ADD COLUMN save_the_sale STRING COMMENT 'Indicates whether the row had a save_the_sale event';

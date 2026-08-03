@@ -1,0 +1,21 @@
+variables:
+
+  sf_kafka_topic:
+    default: ecmde-semantic-filtering
+  sf_schema_key_subject:
+    default: ecmde-semantic-filtering-key
+  sf_schema_value_subject:
+    default: ecmde-semantic-filtering-value
+
+  sf_source_catalog:
+    default: "dev_datasci_db"
+  sf_source_schema:
+    default: "ecm_semantic_filtering"
+
+  sf_watermark_source_catalog:
+    default: "kafka"
+  sf_watermark_source_schema:
+    default: "ecmde"
+  common_schema:
+    default: "common"
+

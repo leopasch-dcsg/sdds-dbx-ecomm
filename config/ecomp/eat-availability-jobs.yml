@@ -1,0 +1,251 @@
+resources:
+  jobs:
+    ecmde-ecomp-eat-availability-dlt:
+      name: ecmde-ecomp-eat-availability-dlt
+
+      tags:
+        job-group: "eat-availability"
+        version: ${var.bundle_version}
+
+
+
+      permissions:
+        - group_name: ${var.admin_group_name}
+          level: CAN_MANAGE
+        - group_name: ${var.eng_group_name}
+          level: CAN_MANAGE_RUN
+        - group_name: ${var.l2_support_group_name}
+          level: CAN_MANAGE_RUN
+        - service_principal_name: ${var.data_platform_sp_id}
+          level: CAN_MANAGE_RUN
+
+      job_clusters:
+        - job_cluster_key: eat_availability_cluster
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            apply_policy_default_values: false
+            policy_id: ${var.job_cluster_policy_id}
+            instance_pool_id: ${var.instance_pool_id}
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+            data_security_mode: USER_ISOLATION
+            runtime_engine: STANDARD
+            autoscale:
+              min_workers: 5
+              max_workers: 10
+            spark_conf:
+              workspace_path_prefix: ${var.workspace_path_prefix}
+            custom_tags: # Tag on DKS Job compute (Mandatory)
+              TEAM_CODE: ${var.team_code}
+
+      tasks:
+        - task_key: ecomp-eat-availability-dlt-task
+          timeout_seconds: ${var.eat_availability_kafka_task_timeout_seconds}
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.ecomp-eat-availability-dlt-pipeline.id}
+
+        - task_key: ecomp-sku-inventory-task
+          job_cluster_key: eat_availability_cluster
+          depends_on:
+            - task_key: ecomp-eat-availability-dlt-task
+          libraries:
+            - whl: ../../dist/*.whl
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/ecomp/notebooks/eat/eat_availability_merge_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_data_quality: silver
+              dbx_merge_watermark_table_name: ${var.ecmde_silver_catalog}.${var.ecmde_silver_schema}.watermarks
+              dbx_merge_source_catalog: ${var.ecmde_bronze_catalog}
+              dbx_merge_source_schema: ${var.ecmde_bronze_schema}
+              dbx_merge_source_table: ${var.eat_availability_bronze_table_name}
+              dbx_merge_destination_catalog: ${var.ecmde_silver_catalog}
+              dbx_merge_destination_schema: ${var.ecmde_silver_schema}
+              dbx_merge_destination_table: ${var.eat_availability_silver_table_name}
+
+        - task_key: ecomp-eat-chain-availability-dlt-task
+          timeout_seconds: ${var.eat_availability_kafka_task_timeout_seconds}
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.ecomp-eat-chain-availability-dlt-pipeline.id}
+
+        - task_key: ecomp-stg-kafka-eat-chain-atp-merge-task
+          job_cluster_key: eat_availability_cluster
+          depends_on:
+            - task_key: ecomp-eat-chain-availability-dlt-task
+          libraries:
+            - whl: ../../dist/*.whl
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/ecomp/notebooks/eat/eat_availability_merge_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_data_quality: ecomp
+              dbx_merge_watermark_table_name: ${var.ecomp_watermark_table_name}
+              dbx_merge_source_catalog: ${var.ecmde_bronze_catalog}
+              dbx_merge_source_schema: ${var.ecmde_bronze_schema}
+              dbx_merge_source_table: ${var.eat_chain_availability_bronze_table_name}
+              dbx_merge_destination_catalog: ${var.ecomp_catalog}
+              dbx_merge_destination_schema: ${var.sb_load_schema}
+              dbx_merge_destination_table: ${var.stg_kafka_eat_chain_atp_table_name}
+
+    ecmde-ecomp-nrt-inventory-batch-insert:
+      name: ecmde-ecomp-nrt-inventory-batch-insert
+
+      tags:
+        job-group: "sb-load"
+        version: ${var.bundle_version}
+
+      permissions:
+        - group_name: ${var.admin_group_name}
+          level: CAN_MANAGE
+        - group_name: ${var.eng_group_name}
+          level: CAN_MANAGE_RUN
+        - group_name: ${var.l2_support_group_name}
+          level: CAN_MANAGE_RUN
+        - service_principal_name: ${var.data_platform_sp_id}
+          level: CAN_MANAGE_RUN
+
+      job_clusters:
+        - job_cluster_key: eat_availability_cluster
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            apply_policy_default_values: false
+            policy_id: ${var.job_cluster_policy_id}
+            instance_pool_id: ${var.instance_pool_id}
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+            data_security_mode: USER_ISOLATION
+            runtime_engine: STANDARD
+            autoscale:
+              min_workers: 5
+              max_workers: 10
+            spark_conf:
+              workspace_path_prefix: ${var.workspace_path_prefix}
+            custom_tags: # Tag on DKS Job compute (Mandatory)
+              TEAM_CODE: ${var.team_code}
+
+      tasks:
+        - task_key: ecomp-nrt-inventory-batch-insert-task
+          job_cluster_key: eat_availability_cluster
+          libraries:
+            - whl: ../../dist/*.whl
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/ecomp/notebooks/eat/stg_nrt_inventory_batch_date_insert_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_watermark_table_name: ${var.ecomp_watermark_table_name}
+              dbx_batch_insert_source_catalog: ${var.ecmde_silver_catalog}
+              dbx_batch_insert_source_schema: ${var.ecmde_silver_schema}
+              dbx_batch_insert_source_table: ${var.eat_availability_silver_table_name}
+              dbx_batch_insert_destination_catalog: ${var.ecomp_catalog}
+              dbx_batch_insert_destination_schema: ${var.sb_load_schema}
+              dbx_batch_insert_destination_table: ${var.stg_nrt_inventory_table_name}
+
+  pipelines:
+    ecomp-eat-availability-dlt-pipeline:
+      name: ecomp-eat-availability-dlt-pipeline
+      continuous: false
+      photon: false
+      libraries:
+        - notebook:
+            path: ${var.workspace_path_prefix}/src/ecmde_ecomm/ecomp/notebooks/eat/eat_kafka_dlt_notebook
+      permissions:
+        - group_name: ${var.admin_group_name}
+          level: CAN_MANAGE
+        - group_name: ${var.eng_group_name}
+          level: CAN_RUN
+        - group_name: ${var.l2_support_group_name}
+          level: CAN_RUN
+        - service_principal_name: ${var.data_platform_sp_id}
+          level: CAN_MANAGE
+      configuration:
+        workspace_path_prefix: ${var.workspace_path_prefix}
+        azure_kv_scope: ${var.azure_kv_scope}
+        dbx_destination_catalog: ${var.ecmde_bronze_catalog}
+        dbx_destination_schema: ${var.ecmde_bronze_schema}
+        dbx_user_id: ${workspace.current_user.short_name}
+        kafka_bootstrap_servers: ${var.eat_availability_kafka_bootstrap_servers}
+        kafka_fail_on_data_loss: ${var.kafka_fail_on_data_loss}
+        kafka_session_timeout_ms: ${var.kafka_session_timeout_ms}
+        kafka_schema_registry_url: ${var.kafka_schema_registry_url}
+        kafka_jaas_config_secret_key: ${var.eat_availability_kafka_jaas_config_secret_key}
+        kafka_schema_registry_user_key: ${var.eat_availability_kafka_schema_registry_user_key}
+        kafka_schema_registry_password_key: ${var.eat_availability_kafka_schema_registry_password_key}
+        dbx_destination_table: ${var.eat_availability_bronze_table_name}
+        dbx_destination_table_comment: ${var.eat_availability_bronze_table_comment}
+        kafka_topics: ${var.eat_availability_topic}
+        kafka_schema_registry_key_subject: ${var.eat_availability_registry_key_subject}
+        kafka_schema_registry_value_subject: ${var.eat_availability_registry_value_subject}
+      edition: "ADVANCED"
+      channel: "CURRENT"
+      catalog: ${var.ecmde_bronze_catalog}
+      target: ${var.ecmde_bronze_schema}
+      clusters:
+        - label: "default"
+          custom_tags: # Tag on DLT compute (Mandatory)
+            TEAM_CODE: ${var.team_code}
+          apply_policy_default_values: false
+          policy_id: ${var.dlt_cluster_policy_id}
+          instance_pool_id: ${var.instance_pool_D4s}
+          autoscale:
+            min_workers: 1
+            max_workers: 10
+
+    ecomp-eat-chain-availability-dlt-pipeline:
+      name: ecomp-eat-chain-availability-dlt-pipeline
+      continuous: false
+      photon: false
+      libraries:
+        - notebook:
+            path: ${var.workspace_path_prefix}/src/ecmde_ecomm/ecomp/notebooks/eat/eat_kafka_dlt_notebook
+      permissions:
+        - group_name: ${var.admin_group_name}
+          level: CAN_MANAGE
+        - group_name: ${var.eng_group_name}
+          level: CAN_RUN
+        - group_name: ${var.l2_support_group_name}
+          level: CAN_RUN
+        - service_principal_name: ${var.data_platform_sp_id}
+          level: CAN_MANAGE
+      configuration:
+        workspace_path_prefix: ${var.workspace_path_prefix}
+        azure_kv_scope: ${var.azure_kv_scope}
+        dbx_destination_catalog: ${var.ecmde_bronze_catalog}
+        dbx_destination_schema: ${var.ecmde_bronze_schema}
+        dbx_user_id: ${workspace.current_user.short_name}
+        kafka_bootstrap_servers: ${var.eat_availability_kafka_bootstrap_servers}
+        kafka_fail_on_data_loss: ${var.kafka_fail_on_data_loss}
+        kafka_session_timeout_ms: ${var.kafka_session_timeout_ms}
+        kafka_schema_registry_url: ${var.kafka_schema_registry_url}
+        kafka_jaas_config_secret_key: ${var.eat_availability_kafka_jaas_config_secret_key}
+        kafka_schema_registry_user_key: ${var.eat_availability_kafka_schema_registry_user_key}
+        kafka_schema_registry_password_key: ${var.eat_availability_kafka_schema_registry_password_key}
+        dbx_destination_table: ${var.eat_chain_availability_bronze_table_name}
+        dbx_destination_table_comment: ${var.eat_chain_availability_bronze_table_comment}
+        kafka_topics: ${var.eat_chain_availability_topic}
+        kafka_schema_registry_key_subject: ${var.eat_chain_availability_registry_key_subject}
+        kafka_schema_registry_value_subject: ${var.eat_chain_availability_registry_value_subject}
+      edition: "ADVANCED"
+      channel: "CURRENT"
+      catalog: ${var.ecmde_bronze_catalog}
+      target: ${var.ecmde_bronze_schema}
+      clusters:
+        - label: "default"
+          custom_tags: # Tag on DLT compute (Mandatory)
+            TEAM_CODE: ${var.team_code}
+          apply_policy_default_values: false
+          policy_id: ${var.dlt_cluster_policy_id}
+          instance_pool_id: ${var.instance_pool_D4s}
+          autoscale:
+            min_workers: 1
+            max_workers: 10
+

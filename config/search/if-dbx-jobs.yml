@@ -1,0 +1,237 @@
+resources:
+  jobs:
+    ecmde-if-feature-table-append:
+      name: ecmde-if-feature-table-append
+
+      tags:
+        job-type: "if-feature-table"
+        job-group: "if"
+        version: ${var.bundle_version}
+
+      permissions:
+        - group_name: ${var.admin_group_name}
+          level: CAN_MANAGE
+        - group_name: ${var.eng_group_name}
+          level: CAN_MANAGE
+        - group_name: ${var.l2_support_group_name}
+          level: CAN_MANAGE_RUN
+        - service_principal_name: ${var.data_platform_sp_id}
+          level: CAN_MANAGE_RUN
+
+      max_concurrent_runs: 10
+
+      parameters:
+        - name: azure_kv_scope
+          default: ${var.azure_kv_scope}
+        - name: source_catalog
+          default: ${var.ecmde_silver_catalog}
+        - name: source_schema
+          default: ${var.ecmde_silver_schema}
+        - name: destination_catalog
+          default: ${var.ecmde_silver_catalog}
+        - name: destination_schema
+          default: ${var.ecmde_silver_schema}
+        - name: lookback_days
+          default: ${var.if_lookback_window}
+        - name: end_date_est
+          default: ""
+
+      job_clusters:
+        - job_cluster_key: intelligent-filtering-append
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            apply_policy_default_values: false
+            policy_id: ${var.ml_cluster_policy_id}
+            instance_pool_id: ${var.instance_pool_E16ads}
+            driver_instance_pool_id: ${var.instance_pool_id}
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+            data_security_mode: USER_ISOLATION
+            runtime_engine: STANDARD
+            autoscale:
+              min_workers: 5
+              max_workers: 10
+            spark_conf:
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              spark.databricks.io.cache.enabled: true
+              spark.sql.shuffle.partitions: auto
+            custom_tags: # Tag on DKS Job compute (Mandatory)
+              TEAM_CODE: ${var.team_code}
+
+      tasks:
+        - task_key: search_event_probability_append
+          max_retries: 0
+          job_cluster_key: intelligent-filtering-append
+          libraries:
+            - whl: ../../dist/*.whl
+          python_wheel_task:
+            package_name: ecmde_ecomm
+            entry_point: search-intelligent-filtering-append
+            named_parameters:
+              azure_kv_scope: "{{job.parameters.azure_kv_scope}}"
+              source_catalog: "{{job.parameters.source_catalog}}"
+              source_schema: "{{job.parameters.source_schema}}"
+              destination_catalog: "{{job.parameters.destination_catalog}}"
+              destination_schema: "{{job.parameters.destination_schema}}"
+              destination_table: ${var.search_event_counts_probabilities_table}
+              lookback_days: "{{job.parameters.lookback_days}}"
+              end_date_est: "{{job.parameters.end_date_est}}"
+
+        - task_key: browse_event_probability_append
+          max_retries: 0
+          job_cluster_key: intelligent-filtering-append
+          libraries:
+            - whl: ../../dist/*.whl
+          python_wheel_task:
+            package_name: ecmde_ecomm
+            entry_point: search-intelligent-filtering-append
+            named_parameters:
+              azure_kv_scope: "{{job.parameters.azure_kv_scope}}"
+              source_catalog: "{{job.parameters.source_catalog}}"
+              source_schema: "{{job.parameters.source_schema}}"
+              destination_catalog: "{{job.parameters.destination_catalog}}"
+              destination_schema: "{{job.parameters.destination_schema}}"
+              destination_table: ${var.browse_event_counts_probabilities_table}
+              lookback_days: "{{job.parameters.lookback_days}}"
+              end_date_est: "{{job.parameters.end_date_est}}"
+
+        - task_key: if_final_agg_append
+          max_retries: 0
+          depends_on:
+            - task_key: browse_event_probability_append
+            - task_key: search_event_probability_append
+          job_cluster_key: intelligent-filtering-append
+          libraries:
+            - whl: ../../dist/*.whl
+          python_wheel_task:
+            package_name: ecmde_ecomm
+            entry_point: search-intelligent-filtering-append
+            named_parameters:
+              azure_kv_scope: "{{job.parameters.azure_kv_scope}}"
+              source_catalog: "{{job.parameters.source_catalog}}"
+              source_schema: "{{job.parameters.source_schema}}"
+              destination_catalog: "{{job.parameters.destination_catalog}}"
+              destination_schema: "{{job.parameters.destination_schema}}"
+              destination_table: ${var.if_event_metrics_model_table}
+              lookback_days: "{{job.parameters.lookback_days}}"
+              end_date_est: "{{job.parameters.end_date_est}}"
+
+    ecmde-search-if-egress:
+      name: ecmde-search-if-egress
+
+      tags:
+        job-type: "if-egress"
+        job-group: "if"
+        version: ${var.bundle_version}
+
+      permissions:
+        - group_name: ${var.admin_group_name}
+          level: CAN_MANAGE
+        - group_name: ${var.eng_group_name}
+          level: CAN_MANAGE_RUN
+        - service_principal_name: ${var.data_platform_sp_id}
+          level: CAN_MANAGE_RUN
+        - group_name: ${var.l2_support_group_name}
+          level: CAN_MANAGE_RUN
+
+
+      parameters:
+        - name: azure_kv_scope
+          default: ${var.azure_kv_scope}
+        - name: source_catalog
+          default: ${var.ecmde_silver_catalog}
+        - name: source_schema
+          default: ${var.ecmde_silver_schema}
+        - name: lookback_days
+          default: ${var.if_lookback_window}
+        - name: end_date_est
+          default: ""
+
+      job_clusters:
+        - job_cluster_key: if-dbx-egress
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            apply_policy_default_values: false
+            policy_id: ${var.ml_cluster_policy_id}
+            instance_pool_id: ${var.instance_pool_E16ads}
+            driver_instance_pool_id: ${var.instance_pool_id}
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+            data_security_mode: USER_ISOLATION
+            runtime_engine: STANDARD
+            autoscale:
+              min_workers: 1
+              max_workers: 10
+            spark_conf:
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              spark.databricks.io.cache.enabled: true
+              spark.sql.shuffle.partitions: auto
+            custom_tags: # Tag on DKS Job compute (Mandatory)
+              TEAM_CODE: ${var.team_code}
+
+      tasks:
+        - task_key: if_metric_model_to_elastic
+          libraries:
+            - whl: ../../dist/*.whl
+            - maven:
+                coordinates: "org.elasticsearch:elasticsearch-spark-30_2.12:8.16.1"
+          job_cluster_key: if-dbx-egress
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/search/notebooks/if_dbx_to_elastic_notebook
+            base_parameters:
+              dbx_env: ${var.dbx_env}
+              bundle_root: ${workspace.file_path}
+              azure_kv_scope: "{{job.parameters.azure_kv_scope}}"
+              dbx_user_id: ${workspace.current_user.short_name}
+              source_catalog: "{{job.parameters.source_catalog}}"
+              source_schema: "{{job.parameters.source_schema}}"
+              source_table: ${var.if_event_metrics_model_table}
+              end_date_est: "{{job.parameters.end_date_est}}"
+              elastic_index: ${var.if_elastic_index}
+              elastic_user_key: ${var.elastic_user_key}
+              elastic_host_dev: ${var.elastic_host_dev}
+              elastic_password_key_dev: ${var.elastic_password_key_dev}
+              elastic_host_prodauth: ${var.elastic_host_prodauth}
+              elastic_password_key_prodauth: ${var.elastic_password_key_prodauth}
+              elastic_host_qa: ${var.elastic_host_qa}
+              elastic_password_key_qa: ${var.elastic_password_key_qa}
+              elastic_host_prodeast: ${var.elastic_host_prodeast}
+              elastic_password_key_prodeast: ${var.elastic_password_key_prodeast}
+              elastic_host_prodeast_reserve: ${var.elastic_host_prodeast_reserve}
+              elastic_password_key_prodeast_reserve: ${var.elastic_password_key_prodeast_reserve}
+              elastic_host_prodwest: ${var.elastic_host_prodwest}
+              elastic_password_key_prodwest: ${var.elastic_password_key_prodwest}
+              elastic_host_prodwest_reserve: ${var.elastic_host_prodwest_reserve}
+              elastic_password_key_prodwest_reserve: ${var.elastic_password_key_prodwest_reserve}
+
+        - task_key: if_metric_model_to_kafka
+          job_cluster_key: if-dbx-egress
+          libraries:
+            - whl: ../../dist/*.whl
+            - maven:
+                coordinates: "org.apache.spark:spark-avro_2.12:3.5.4"
+            - maven:
+                coordinates: "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4"
+            - maven:
+                coordinates: "org.apache.kafka:kafka-clients:3.5.2"
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/search/notebooks/if_dbx_to_kafka_notebook
+            base_parameters:
+              azure_kv_scope: "{{job.parameters.azure_kv_scope}}"
+              dbx_watermark_table_name: ${var.ecmde_silver_catalog}.${var.ecmde_silver_schema}.watermarks
+              dbx_watermark_catalog_name: "{{job.parameters.source_catalog}}"
+              dbx_watermark_schema_name: "{{job.parameters.source_schema}}"
+              end_date_est: "{{job.parameters.end_date_est}}"
+              kafka_bootstrap_servers: ${var.kafka_bootstrap_servers}
+              kafka_fail_on_data_loss: ${var.kafka_fail_on_data_loss}
+              kafka_session_timeout_ms: ${var.kafka_session_timeout_ms}
+              kafka_schema_registry_url: ${var.kafka_schema_registry_url}
+              kafka_jaas_config_secret_key: ${var.kafka_jaas_config_secret_key}
+              kafka_schema_registry_user_key: ${var.kafka_schema_registry_user_key}
+              kafka_schema_registry_password_key: ${var.kafka_schema_registry_password_key}
+              kafka_schema_registry_key_subject: ${var.if_schema_key_subject}
+              kafka_schema_registry_value_subject: ${var.if_schema_value_subject}
+              kafka_publish_topic: ${var.if_kafka_topic}
+              kafka_publish_source_table_name: ${var.ecmde_silver_catalog}.${var.ecmde_silver_schema}.${var.if_event_metrics_model_table}

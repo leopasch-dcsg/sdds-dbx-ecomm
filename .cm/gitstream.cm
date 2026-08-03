@@ -1,0 +1,58 @@
+# -*- mode: yaml -*-
+manifest:
+  version: 1.0
+automations:
+  linearb_ai_description:
+    if:
+      - false
+    run:
+      - action: add-comment@v1
+        args:
+          comment: N/A
+  linearb_ai_review:
+    if:
+      - false
+    run:
+      - action: add-comment@v1
+        args:
+          comment: N/A
+
+  assign_code_experts:
+    if:
+      - false
+    run:
+      - action: add-comment@v1
+        args:
+          comment: N/A
+
+  label_prs_without_tests:
+    if:
+      - false
+    run:
+      - action: add-comment@v1
+        args:
+          comment: N/A
+
+  label_approvals:
+    if:
+      - false
+    run:
+      - action: add-comment@v1
+        args:
+          comment: N/A
+
+  review_sensitive_files:
+    if:
+      - false
+    run:
+      - action: add-comment@v1
+        args:
+          comment: N/A
+
+  safe_changes:
+    if:
+      - false
+    run:
+      - action: add-comment@v1
+        args:
+          comment: N/A

@@ -1,0 +1,131 @@
+resources:
+  jobs:
+    ecmde-ecomp-missing-image-bypass-ecode-ingest:
+      name: ecmde-ecomp-missing-image-bypass-ecode-ingest
+
+      tags:
+        job-group: "missing-image"
+        version: ${var.bundle_version}
+
+      permissions:
+        - group_name: ${var.admin_group_name}
+          level: CAN_MANAGE
+        - group_name: ${var.eng_group_name}
+          level: CAN_MANAGE
+        - service_principal_name: ${var.ecmde_sp_id}
+          level: CAN_MANAGE
+        - group_name: ${var.l2_support_group_name}
+          level: CAN_MANAGE_RUN
+        - service_principal_name: ${var.data_platform_sp_id}
+          level: CAN_MANAGE_RUN
+
+      job_clusters:
+        - job_cluster_key: missing-image-cluster
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            apply_policy_default_values: false
+            policy_id: ${var.job_cluster_policy_id}
+            instance_pool_id: ${var.instance_pool_id}
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+            data_security_mode: USER_ISOLATION
+            runtime_engine: STANDARD
+            autoscale:
+              min_workers: 2
+              max_workers: 5
+            spark_conf:
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              spark.databricks.delta.optimizeWrite.enabled: "true"
+              spark.databricks.delta.autoCompact.enabled: "true"
+            custom_tags:
+              TEAM_CODE: ${var.team_code}
+
+      tasks:
+        - task_key: ingest_bypass_ecode_image_check
+          job_cluster_key: missing-image-cluster
+          libraries:
+            - whl: ../../dist/*.whl
+            - maven:
+                coordinates: "mysql:mysql-connector-java:8.0.33"
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/ecomp/notebooks/missing_image/missing_image_ingest_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              mysql_jdbc_url: ${var.missing_image_mysql_jdbc_url}
+              mysql_username_key: ${var.missing_image_mysql_username_key}
+              mysql_password_key: ${var.missing_image_mysql_password_key}
+              mysql_watermark_column: ${var.missing_image_mysql_watermark_column}
+              dbx_source_table: bypass_ecode_image_check
+              dbx_destination_catalog: ${var.missing_image_bronze_catalog}
+              dbx_destination_schema: ${var.missing_image_bronze_schema}
+              dbx_destination_table: ${var.bypass_ecode_image_check_table_name}
+              dbx_merge_watermark_table_name: ${var.missing_image_watermark_table_name}
+
+    ecmde-ecomp-missing-image-bypass-color-ingest:
+      name: ecmde-ecomp-missing-image-bypass-color-ingest
+
+      tags:
+        job-group: "missing-image"
+        version: ${var.bundle_version}
+
+      permissions:
+        - group_name: ${var.admin_group_name}
+          level: CAN_MANAGE
+        - group_name: ${var.eng_group_name}
+          level: CAN_MANAGE
+        - service_principal_name: ${var.ecmde_sp_id}
+          level: CAN_MANAGE
+        - group_name: ${var.l2_support_group_name}
+          level: CAN_MANAGE_RUN
+        - service_principal_name: ${var.data_platform_sp_id}
+          level: CAN_MANAGE_RUN
+
+      job_clusters:
+        - job_cluster_key: missing-image-cluster
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            apply_policy_default_values: false
+            policy_id: ${var.job_cluster_policy_id}
+            instance_pool_id: ${var.instance_pool_id}
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+            data_security_mode: USER_ISOLATION
+            runtime_engine: STANDARD
+            autoscale:
+              min_workers: 2
+              max_workers: 5
+            spark_conf:
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              spark.databricks.delta.optimizeWrite.enabled: "true"
+              spark.databricks.delta.autoCompact.enabled: "true"
+            custom_tags:
+              TEAM_CODE: ${var.team_code}
+
+      tasks:
+        - task_key: ingest_bypass_color_image_check
+          job_cluster_key: missing-image-cluster
+          libraries:
+            - whl: ../../dist/*.whl
+            - maven:
+                coordinates: "mysql:mysql-connector-java:8.0.33"
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/ecomp/notebooks/missing_image/missing_image_ingest_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              mysql_jdbc_url: ${var.missing_image_mysql_jdbc_url}
+              mysql_username_key: ${var.missing_image_mysql_username_key}
+              mysql_password_key: ${var.missing_image_mysql_password_key}
+              mysql_watermark_column: ${var.missing_image_mysql_watermark_column}
+              dbx_source_table: bypass_color_image_check
+              dbx_destination_catalog: ${var.missing_image_bronze_catalog}
+              dbx_destination_schema: ${var.missing_image_bronze_schema}
+              dbx_destination_table: ${var.bypass_color_image_check_table_name}
+              dbx_merge_watermark_table_name: ${var.missing_image_watermark_table_name}

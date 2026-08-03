@@ -1,0 +1,27 @@
+variables:
+  inv_es_kv_scope:
+    default: "kv-dsg-prodcat-dbx"
+
+  inv_es_user:
+    default: "eventing-middleware-backfill"
+
+  inv_es_password_key:
+    default: "prodcat-kafka-elasticsearchtest-password"
+
+  inv_es_host:
+    default: "https://dsg-catalog-nonprod-east.es.eastus.azure.elastic-cloud.com/"
+
+  inv_es_port:
+    default: "443"
+
+  inv_ecode_attributes_index:
+    default: "pc-pim-ecode-attributes-v1-stg"
+
+  inv_ecode_attributes_table_name:
+    default: "inv_ecode_attributes"
+
+  inv_destination_catalog:
+    default: "dev_ecmde_db"
+
+  inv_destination_schema:
+    default: "inventory"

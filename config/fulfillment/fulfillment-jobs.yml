@@ -1,0 +1,497 @@
+resources:
+  jobs:
+    ecmde-fulfillment-oso-staging-tables:
+      name: ecmde-fulfillment-oso-staging-tables
+      tags:
+        job-group: "fulfillment"
+        version: ${var.bundle_version}
+
+      permissions:
+        - group_name: ${var.admin_group_name}
+          level: CAN_MANAGE
+        - group_name: ${var.eng_group_name}
+          level: CAN_MANAGE_RUN
+        - group_name: ${var.l2_support_group_name}
+          level: CAN_MANAGE_RUN
+        - service_principal_name: ${var.data_platform_sp_id}
+          level: CAN_MANAGE_RUN
+      job_clusters:
+        - job_cluster_key: fmod_cluster
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            apply_policy_default_values: false
+            policy_id: ${var.job_cluster_policy_id}
+            instance_pool_id: ${var.instance_pool_id}
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+            data_security_mode: USER_ISOLATION
+            runtime_engine: STANDARD
+            autoscale:
+              min_workers: 5
+              max_workers: 10
+            spark_conf:
+              workspace_path_prefix: ${var.workspace_path_prefix}
+            custom_tags:
+              TEAM_CODE: ${var.team_code}
+      tasks:
+        - task_key: fulfillment-order-fulfill-task
+          job_cluster_key: fmod_cluster
+          libraries:
+            - whl: ../../dist/*.whl
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/fulfillment/notebooks/fulfillment_merge_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_data_quality: silver
+              dbx_merge_watermark_table_name: ${var.ecmde_silver_catalog}.${var.ecmde_silver_schema}.watermarks
+              dbx_merge_source_catalog: ${var.oso_source_catalog}
+              dbx_merge_source_schema: ${var.oso_source_schema}
+              dbx_merge_source_table: ${var.oso_order_fulfill_source_table_name}
+              dbx_merge_destination_catalog: ${var.ecmde_silver_catalog}
+              dbx_merge_destination_schema: ${var.ecmde_silver_schema}
+              dbx_merge_destination_table: ${var.oso_order_fulfill_silver_table_name}
+              oso_source_catalog: ${var.oso_source_catalog}
+              fit_source_catalog: ${var.fit_source_catalog}
+              ecomp_catalog: ${var.ecomp_catalog}
+
+        - task_key: fulfillment-order-sku-shipment-task
+          job_cluster_key: fmod_cluster
+          libraries:
+            - whl: ../../dist/*.whl
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/fulfillment/notebooks/fulfillment_merge_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_data_quality: silver
+              dbx_merge_watermark_table_name: ${var.ecmde_silver_catalog}.${var.ecmde_silver_schema}.watermarks
+              dbx_merge_source_catalog: ${var.oso_source_catalog}
+              dbx_merge_source_schema: ${var.oso_source_schema}
+              dbx_merge_source_table: ${var.oso_order_fulfill_source_table_name}
+              dbx_merge_destination_catalog: ${var.ecmde_silver_catalog}
+              dbx_merge_destination_schema: ${var.ecmde_silver_schema}
+              dbx_merge_destination_table: ${var.oso_order_sku_shipment_silver_table_name}
+              oso_source_catalog: ${var.oso_source_catalog}
+              fit_source_catalog: ${var.fit_source_catalog}
+              ecomp_catalog: ${var.ecomp_catalog}
+
+        - task_key: fulfillment-order-sku-task
+          job_cluster_key: fmod_cluster
+          libraries:
+            - whl: ../../dist/*.whl
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/fulfillment/notebooks/fulfillment_merge_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_data_quality: silver
+              dbx_merge_watermark_table_name: ${var.ecmde_silver_catalog}.${var.ecmde_silver_schema}.watermarks
+              dbx_merge_source_catalog: ${var.oso_source_catalog}
+              dbx_merge_source_schema: ${var.oso_source_schema}
+              dbx_merge_source_table: ${var.oso_order_sku_source_table_name}
+              dbx_merge_destination_catalog: ${var.ecmde_silver_catalog}
+              dbx_merge_destination_schema: ${var.ecmde_silver_schema}
+              dbx_merge_destination_table: ${var.oso_order_sku_silver_table_name}
+              oso_source_catalog: ${var.oso_source_catalog}
+              fit_source_catalog: ${var.fit_source_catalog}
+              ecomp_catalog: ${var.ecomp_catalog}
+
+        - task_key: fulfillment-order-deliver-task
+          job_cluster_key: fmod_cluster
+          libraries:
+            - whl: ../../dist/*.whl
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/fulfillment/notebooks/fulfillment_merge_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_data_quality: silver
+              dbx_merge_watermark_table_name: ${var.ecmde_silver_catalog}.${var.ecmde_silver_schema}.watermarks
+              dbx_merge_source_catalog: ${var.oso_source_catalog}
+              dbx_merge_source_schema: ${var.oso_source_schema}
+              dbx_merge_source_table: ${var.oso_order_sku_source_table_name}
+              dbx_merge_destination_catalog: ${var.ecmde_silver_catalog}
+              dbx_merge_destination_schema: ${var.ecmde_silver_schema}
+              dbx_merge_destination_table: ${var.oso_order_delivery_silver_table_name}
+              oso_source_catalog: ${var.oso_source_catalog}
+              fit_source_catalog: ${var.fit_source_catalog}
+              ecomp_catalog: ${var.ecomp_catalog}
+
+        - task_key: fulfillment-txn_order-sku-task
+          job_cluster_key: fmod_cluster
+          libraries:
+            - whl: ../../dist/*.whl
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/fulfillment/notebooks/fulfillment_merge_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_data_quality: silver
+              dbx_merge_watermark_table_name: ${var.ecmde_silver_catalog}.${var.ecmde_silver_schema}.watermarks
+              dbx_merge_source_catalog: ${var.oso_source_catalog}
+              dbx_merge_source_schema: ${var.oso_source_schema}
+              dbx_merge_source_table: ${var.oso_order_sku_source_table_name}
+              dbx_merge_destination_catalog: ${var.ecmde_silver_catalog}
+              dbx_merge_destination_schema: ${var.ecmde_silver_schema}
+              dbx_merge_destination_table: ${var.oso_txn_order_sku_silver_table_name}
+              oso_source_catalog: ${var.oso_source_catalog}
+              fit_source_catalog: ${var.fit_source_catalog}
+              ecomp_catalog: ${var.ecomp_catalog}
+
+        - task_key: fulfillment-order-header-task
+          job_cluster_key: fmod_cluster
+          libraries:
+            - whl: ../../dist/*.whl
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/fulfillment/notebooks/fulfillment_merge_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_data_quality: silver
+              dbx_merge_watermark_table_name: ${var.ecmde_silver_catalog}.${var.ecmde_silver_schema}.watermarks
+              dbx_merge_source_catalog: ${var.oso_source_catalog}
+              dbx_merge_source_schema: ${var.oso_source_schema}
+              dbx_merge_source_table: ${var.oso_order_fulfill_source_table_name}
+              dbx_merge_destination_catalog: ${var.ecmde_silver_catalog}
+              dbx_merge_destination_schema: ${var.ecmde_silver_schema}
+              dbx_merge_destination_table: ${var.oso_order_header_silver_table_name}
+              oso_source_catalog: ${var.oso_source_catalog}
+              fit_source_catalog: ${var.fit_source_catalog}
+              ecomp_catalog: ${var.ecomp_catalog}
+
+    ecmde-fulfillment-order-fulfill-stg-dbx-egress:
+      name: ecmde-fulfillment-order-fulfill-stg-dbx-egress
+      tags: &job_tags
+        cm-application: "ECMDE"
+        cm-sub-application: "DBX"
+        cm-job-folder: "ECMDEDY010"
+        cm-job-name: "ECMDEDY010_200"
+        job-group: "fulfillment"
+        version: ${var.bundle_version}
+      environments:
+        - environment_key: default
+          spec:
+            client: "4"
+            dependencies:
+              - ../../dist/*.whl
+      permissions: &job_permissions
+        - group_name: ${var.admin_group_name}
+          level: CAN_MANAGE
+        - group_name: ${var.eng_group_name}
+          level: CAN_MANAGE_RUN
+        - group_name: ${var.l2_support_group_name}
+          level: CAN_MANAGE_RUN
+        - service_principal_name: ${var.data_platform_sp_id}
+          level: CAN_MANAGE_RUN
+
+      tasks:
+        - task_key: fulfillment-order-fulfill-stg-dbx-egress
+          environment_key: default
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/fulfillment/notebooks/fulfillment_egress
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_data_quality: silver
+              fmodegress: DBX
+              watermark_table_name: ${var.ecmde_silver_catalog}.${var.ecmde_silver_schema}.watermarks
+
+              # ECOMP DBX Egress Configs
+              source_catalog: ${var.ecmde_silver_catalog}
+              source_schema: ${var.ecmde_silver_schema}
+              source_table: ${var.oso_order_fulfill_silver_table_name}
+              destination_catalog: ${var.ecomp_catalog}
+              destination_schema: ${var.ecom_schema}
+              destination_table: ${var.oso_order_fulfill_silver_table_name}
+
+        - task_key: fulfillment-order-fulfill-stg-dq
+          depends_on:
+            - task_key: fulfillment-order-fulfill-stg-dbx-egress
+          environment_key: default
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/common/notebooks/dq_runner_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              dq_run_id: "{{job.run_id}}-fulfillment-order-fulfill-stg-egress"
+              dq_domain: fulfillment
+              dq_table_name: ${var.oso_order_fulfill_silver_table_name}
+              dq_source_table: ${var.ecomp_catalog}.${var.ecom_schema}.${var.oso_order_fulfill_silver_table_name}
+              dq_config_table: ${var.dq_config_table}
+              dq_result_table: ${var.dq_result_table}
+              dq_summary_table: ${var.dq_summary_table}
+              dq_fail_on_breach: ${var.dq_fail_on_breach}
+              dq_xmatters_webhook_secret: ${var.dq_xmatters_webhook_secret}
+
+    ecmde-fulfillment-order-sku-shipment-stg-dbx-egress:
+      name: ecmde-fulfillment-order-sku-shipment-stg-dbx-egress
+      tags:
+        <<: *job_tags
+        cm-job-name: "ECMDEDY010_300"
+      environments:
+        - environment_key: default
+          spec:
+            client: "4"
+            dependencies:
+              - ../../dist/*.whl
+      permissions: *job_permissions
+      tasks:
+        - task_key: fulfillment-order-sku-shipment-stg-dbx-egress
+          environment_key: default
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/fulfillment/notebooks/fulfillment_egress
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_data_quality: silver
+              fmodegress: DBX
+              watermark_table_name: ${var.ecmde_silver_catalog}.${var.ecmde_silver_schema}.watermarks
+
+              # ECOMP DBX Egress Configs
+              source_catalog: ${var.ecmde_silver_catalog}
+              source_schema: ${var.ecmde_silver_schema}
+              source_table: ${var.oso_order_sku_shipment_silver_table_name}
+              destination_catalog: ${var.ecomp_catalog}
+              destination_schema: ${var.ecom_schema}
+              destination_table: ${var.oso_order_sku_shipment_silver_table_name}
+
+        - task_key: fulfillment-order-sku-shipment-stg-dq
+          depends_on:
+            - task_key: fulfillment-order-sku-shipment-stg-dbx-egress
+          environment_key: default
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/common/notebooks/dq_runner_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              dq_run_id: "{{job.run_id}}-fulfillment-order-sku-shipment-stg-egress"
+              dq_domain: fulfillment
+              dq_table_name: ${var.oso_order_sku_shipment_silver_table_name}
+              dq_source_table: ${var.ecomp_catalog}.${var.ecom_schema}.${var.oso_order_sku_shipment_silver_table_name}
+              dq_config_table: ${var.dq_config_table}
+              dq_result_table: ${var.dq_result_table}
+              dq_summary_table: ${var.dq_summary_table}
+              dq_fail_on_breach: ${var.dq_fail_on_breach}
+              dq_xmatters_webhook_secret: ${var.dq_xmatters_webhook_secret}
+
+    ecmde-fulfillment-order-header-stg-dbx-egress:
+      name: ecmde-fulfillment-order-header-stg-dbx-egress
+      tags:
+        <<: *job_tags
+        cm-job-name: "ECMDEDY010_400"
+      environments:
+        - environment_key: default
+          spec:
+            client: "4"
+            dependencies:
+              - ../../dist/*.whl
+      permissions: *job_permissions
+      tasks:
+        - task_key: fulfillment-order-header-stg-dbx-egress
+          environment_key: default
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/fulfillment/notebooks/fulfillment_egress
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_data_quality: silver
+              fmodegress: DBX
+              watermark_table_name: ${var.ecmde_silver_catalog}.${var.ecmde_silver_schema}.watermarks
+              # ECOMP DBX Egress Configs
+              source_catalog: ${var.ecmde_silver_catalog}
+              source_schema: ${var.ecmde_silver_schema}
+              source_table: ${var.oso_order_header_silver_table_name}
+              destination_catalog: ${var.ecomp_catalog}
+              destination_schema: ${var.ecom_schema}
+              destination_table: ${var.oso_order_header_silver_table_name}
+
+        - task_key: fulfillment-order-header-stg-dq
+          depends_on:
+            - task_key: fulfillment-order-header-stg-dbx-egress
+          environment_key: default
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/common/notebooks/dq_runner_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              dq_run_id: "{{job.run_id}}-fulfillment-order-header-stg-egress"
+              dq_domain: fulfillment
+              dq_table_name: ${var.oso_order_header_silver_table_name}
+              dq_source_table: ${var.ecomp_catalog}.${var.ecom_schema}.${var.oso_order_header_silver_table_name}
+              dq_config_table: ${var.dq_config_table}
+              dq_result_table: ${var.dq_result_table}
+              dq_summary_table: ${var.dq_summary_table}
+              dq_fail_on_breach: ${var.dq_fail_on_breach}
+              dq_xmatters_webhook_secret: ${var.dq_xmatters_webhook_secret}
+
+    ecmde-fulfillment-order-delivery-stg-dbx-egress:
+      name: ecmde-fulfillment-order-delivery-stg-dbx-egress
+      tags:
+        <<: *job_tags
+        cm-job-name: "ECMDEDY010_500"
+      environments:
+        - environment_key: default
+          spec:
+            client: "4"
+            dependencies:
+              - ../../dist/*.whl
+      permissions: *job_permissions
+      tasks:
+        - task_key: fulfillment-order-delivery-stg-dbx-egress
+          environment_key: default
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/fulfillment/notebooks/fulfillment_egress
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_data_quality: silver
+              fmodegress: DBX
+              watermark_table_name: ${var.ecmde_silver_catalog}.${var.ecmde_silver_schema}.watermarks
+              # ECOMP DBX Egress Configs
+              source_catalog: ${var.ecmde_silver_catalog}
+              source_schema: ${var.ecmde_silver_schema}
+              source_table: ${var.oso_order_delivery_silver_table_name}
+              destination_catalog: ${var.ecomp_catalog}
+              destination_schema: ${var.ecom_schema}
+              destination_table: ${var.oso_order_delivery_silver_table_name}
+
+        - task_key: fulfillment-order-delivery-stg-dq
+          depends_on:
+            - task_key: fulfillment-order-delivery-stg-dbx-egress
+          environment_key: default
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/common/notebooks/dq_runner_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              dq_run_id: "{{job.run_id}}-fulfillment-order-delivery-stg-egress"
+              dq_domain: fulfillment
+              dq_table_name: ${var.oso_order_delivery_silver_table_name}
+              dq_source_table: ${var.ecomp_catalog}.${var.ecom_schema}.${var.oso_order_delivery_silver_table_name}
+              dq_config_table: ${var.dq_config_table}
+              dq_result_table: ${var.dq_result_table}
+              dq_summary_table: ${var.dq_summary_table}
+              dq_fail_on_breach: ${var.dq_fail_on_breach}
+              dq_xmatters_webhook_secret: ${var.dq_xmatters_webhook_secret}
+
+    ecmde-fulfillment-order-sku-stg-dbx-egress:
+      name: ecmde-fulfillment-order-sku-stg-dbx-egress
+      tags:
+        <<: *job_tags
+        cm-job-name: "ECMDEDY010_600"
+      environments:
+        - environment_key: default
+          spec:
+            client: "4"
+            dependencies:
+              - ../../dist/*.whl
+      permissions: *job_permissions
+      tasks:
+        - task_key: fulfillment-order-sku-stg-dbx-egress
+          environment_key: default
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/fulfillment/notebooks/fulfillment_egress
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_data_quality: silver
+              fmodegress: DBX
+              watermark_table_name: ${var.ecmde_silver_catalog}.${var.ecmde_silver_schema}.watermarks
+              # ECOMP DBX Egress Configs
+              source_catalog: ${var.ecmde_silver_catalog}
+              source_schema: ${var.ecmde_silver_schema}
+              source_table: ${var.oso_order_sku_silver_table_name}
+              destination_catalog: ${var.ecomp_catalog}
+              destination_schema: ${var.ecom_schema}
+              destination_table: ${var.oso_order_sku_silver_table_name}
+
+        - task_key: fulfillment-order-sku-stg-dq
+          depends_on:
+            - task_key: fulfillment-order-sku-stg-dbx-egress
+          environment_key: default
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/common/notebooks/dq_runner_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              dq_run_id: "{{job.run_id}}-fulfillment-order-sku-stg-egress"
+              dq_domain: fulfillment
+              dq_table_name: ${var.oso_order_sku_silver_table_name}
+              dq_source_table: ${var.ecomp_catalog}.${var.ecom_schema}.${var.oso_order_sku_silver_table_name}
+              dq_config_table: ${var.dq_config_table}
+              dq_result_table: ${var.dq_result_table}
+              dq_summary_table: ${var.dq_summary_table}
+              dq_fail_on_breach: ${var.dq_fail_on_breach}
+              dq_xmatters_webhook_secret: ${var.dq_xmatters_webhook_secret}
+
+    ecmde-fulfillment-txn-order-sku-stg-dbx-egress:
+      name: ecmde-fulfillment-txn-order-sku-stg-dbx-egress
+      tags:
+        <<: *job_tags
+        cm-job-name: "ECMDEDY010_700"
+      environments:
+        - environment_key: default
+          spec:
+            client: "4"
+            dependencies:
+              - ../../dist/*.whl
+      permissions: *job_permissions
+      tasks:
+        - task_key: fulfillment-txn-order-sku-stg-dbx-egress
+          environment_key: default
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/fulfillment/notebooks/fulfillment_egress
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_data_quality: silver
+              fmodegress: DBX
+              watermark_table_name: ${var.ecmde_silver_catalog}.${var.ecmde_silver_schema}.watermarks
+              # ECOMP DBX Egress Configs
+              source_catalog: ${var.ecmde_silver_catalog}
+              source_schema: ${var.ecmde_silver_schema}
+              source_table: ${var.oso_txn_order_sku_silver_table_name}
+              destination_catalog: ${var.ecomp_catalog}
+              destination_schema: ${var.ecom_schema}
+              destination_table: ${var.oso_txn_order_sku_silver_table_name}
+
+        - task_key: fulfillment-txn-order-sku-stg-dq
+          depends_on:
+            - task_key: fulfillment-txn-order-sku-stg-dbx-egress
+          environment_key: default
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/ecmde_ecomm/common/notebooks/dq_runner_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              dq_run_id: "{{job.run_id}}-fulfillment-txn-order-sku-stg-egress"
+              dq_domain: fulfillment
+              dq_table_name: ${var.oso_txn_order_sku_silver_table_name}
+              dq_source_table: ${var.ecomp_catalog}.${var.ecom_schema}.${var.oso_txn_order_sku_silver_table_name}
+              dq_config_table: ${var.dq_config_table}
+              dq_result_table: ${var.dq_result_table}
+              dq_summary_table: ${var.dq_summary_table}
+              dq_fail_on_breach: ${var.dq_fail_on_breach}
+              dq_xmatters_webhook_secret: ${var.dq_xmatters_webhook_secret}
+
+

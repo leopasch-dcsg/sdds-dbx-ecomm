@@ -1,0 +1,65 @@
+resources:
+  jobs:
+    ecmde-hashed-key-generator:
+      name: "ecmde-hashed-key-generator"
+      tags:
+        job-group: "common"
+        version: ${var.bundle_version}
+
+      permissions:
+        - group_name: ${var.admin_group_name}
+          level: CAN_MANAGE
+        - group_name: ${var.eng_group_name}
+          level: CAN_MANAGE
+        - service_principal_name: ${var.ecmde_sp_id}
+          level: CAN_MANAGE
+        - group_name: ${var.l2_support_group_name}
+          level: CAN_MANAGE_RUN
+        - service_principal_name: ${var.data_platform_sp_id}
+          level: CAN_MANAGE_RUN
+
+      job_clusters:
+        - job_cluster_key: callable_jobs_cluster
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            apply_policy_default_values: false
+            policy_id: ${var.job_cluster_policy_id}
+            instance_pool_id: ${var.instance_pool_D16s}
+            driver_instance_pool_id: ${var.instance_pool_id}
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+            data_security_mode: USER_ISOLATION
+            runtime_engine: STANDARD
+            autoscale:
+              min_workers: 1
+              max_workers: 5
+            spark_conf:
+              workspace_path_prefix: ${var.workspace_path_prefix}
+            custom_tags:
+              TEAM_CODE: ${var.team_code}
+      parameters:
+        - name: source_catalog
+          default: ""
+        - name: source_schema
+          default: ""
+        - name: source_table
+          default: ""
+        - name: key_columns
+          default: ""
+        - name: output_column
+          default: ""
+      tasks:
+        - task_key: hashed-key-generator
+          job_cluster_key: callable_jobs_cluster
+          libraries:
+            - whl: ../../dist/*.whl
+          python_wheel_task:
+            package_name: ecmde_ecomm
+            entry_point: hash-key
+            named_parameters:
+              source_catalog: "{{job.parameters.source_catalog}}"
+              source_schema: "{{job.parameters.source_schema}}"
+              source_table: "{{job.parameters.source_table}}"
+              key_columns: "{{job.parameters.key_columns}}"
+              output_column: "{{job.parameters.output_column}}"

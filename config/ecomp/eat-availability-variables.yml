@@ -1,0 +1,44 @@
+variables:
+
+  sb_load_schema:
+    default: "sb_load"
+    
+  eat_availability_kafka_jaas_config_secret_key:
+    default: ecmde-kafka-jaas-config-p
+  eat_availability_kafka_schema_registry_user_key:
+    default: ecmde-kafka-registry-user-p
+  eat_availability_kafka_schema_registry_password_key:
+    default: ecmde-kafka-registry-password-p
+  eat_availability_kafka_task_timeout_seconds:
+    default: 2700
+  # default to production Kafka
+  eat_availability_kafka_bootstrap_servers:
+    default: pkc-122rj.eastus.azure.confluent.cloud:9092
+
+  eat_availability_bronze_table_name:
+    default: eat_availability_dlt
+  eat_availability_bronze_table_comment:
+    default: "Kafka raw data for eat-availability topic."
+  eat_availability_silver_table_name:
+    default: sku_inventory
+  stg_nrt_inventory_table_name:
+    default: stg_nrt_inventory
+  eat_availability_topic:
+    default: eat-availability
+  eat_availability_registry_key_subject:
+    default: eat-availability-key
+  eat_availability_registry_value_subject:
+    default: eat-availability-value
+
+  eat_chain_availability_bronze_table_name:
+    default: eat_chain_availability_dlt
+  stg_kafka_eat_chain_atp_table_name:
+    default: stg_kafka_eat_chain_atp
+  eat_chain_availability_bronze_table_comment:
+    default: "Kafka raw data for eat-chain-availability topic."
+  eat_chain_availability_topic:
+    default: eat-chain-availability
+  eat_chain_availability_registry_key_subject:
+    default: eat-chain-availability-key
+  eat_chain_availability_registry_value_subject:
+    default: eat-chain-availability-value

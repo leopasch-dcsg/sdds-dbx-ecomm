@@ -1,0 +1,186 @@
+CREATE OR REPLACE VIEW ${ecom_apps_schema}.qlik_dim_webstore_sku_vw
+(
+  ECOM_WEB_SKU_KEY,
+  ECOM_WEB_SKU_PRODUCT_ID,
+  ECOM_WEB_SKU_CURRENT_PRICE,
+  ECOM_WEB_SKU_LIST_PRICE,
+  ECOM_WEB_SKU_STATUS,
+  ECOM_WEB_SKU_STATUS_DETAIL,
+  ECOM_WEB_SKU_CLEAR_TYPE_KEY,
+  ECOM_WEB_SKU_WEBSTORE_KEY,
+  ECOM_WEB_SKU_EFF_DATE_KEY,
+  ECOM_WEB_SKU_END_DATE_KEY,
+  ECOM_WEB_SKU_FIRST_ACT_DT_KEY,
+  ECOM_WEB_SKU_LAST_ACT_DT_KEY,
+  ECOM_WEB_SKU_MAP_PRICE,
+  ECOM_WEB_SKU_FIRST_ATP_DT_KEY,
+  ECOM_WEB_SKU_LAST_ATP_DT_KEY,
+  ECOM_WEB_SKU_BUYABLE,
+  ECOM_WEB_SKU_DISPLAYABLE,
+  ECOM_WEB_SKU_BOPIS_FLG,
+  ECOM_WEB_SKU_ISA_AVAILABLE_FLG,
+  ECOM_WEB_SKU_ATP_FLG,
+  ECOM_WEB_SKU_CLEARANCE_GRP,
+  ECOM_WEB_SKU_PRICE_UPD_DT_KEY,
+  ECOM_WEB_SKU_PERM_PRICE,
+  ECOM_WEB_SKU_CURR_PRICE_TYPE,
+  ECOM_WEB_PRICE_START_DATE,
+  ECOM_WEB_PRICE_END_DATE,
+  ECOM_WEB_SKU_PROMO_EXCL_GRP,
+  WEB_SKU_NON_DISPLAY_REASON,
+  WEB_SKU_PRICE_AVG_COST_MARGIN,
+  WEB_SKU_PRICE_CURR_COST_MARGIN,
+  ECOM_WEB_SKU_WEB_PRODUCT_KEY,
+  WEB_SKU_WCS_STATUS,
+  ECOM_WEB_SKU_PRICE_IN_CART_FLG,
+  NEGATIVE_CURR_COST_MARGIN,
+  NEGATIVE_AVG_COST_MARGIN,
+  ECOM_WEB_SKU_CLR_COLOR,
+  ECOM_WEB_SKU_STH_FLAG,
+  ECOM_WEB_SKU_OFFER_PRICE_EVENT,
+  ECOM_WEB_SKU_SW_ELIG_FLG,
+  ECOM_WEB_SKU_BOPL_FLG,
+  ECOM_WEB_SKU_MIN_PURCHQTY,
+  ECOM_WEB_SKU_MAX_PURCHQTY
+) AS
+SELECT
+  sh.WEB_SKU_KEY AS ECOM_WEB_SKU_KEY,
+  sh.dks_Sku_key AS product_id,
+  sh.WEB_PRICE AS ecom_web_SKU_current_price,
+  sh.list_price AS ecom_web_SKU_list_PRICE,
+  NVL(sh.discontinued_flg, 'I') AS ecom_WEB_SKU_STATUS,
+  NVL(sh.discontinued_flg, 'I')
+  || CASE
+    WHEN sh.WEB_PRICE IS NULL THEN 'p'
+  END
+  || CASE
+    WHEN sh.list_price IS NULL THEN 'l'
+  END
+  || CASE
+    WHEN
+      NVL(BOPIS_FLG, 'N') = 'N'
+      AND NVL(ATP_INV_FLG, 'N') = 'N'
+    THEN
+      'a'
+  END AS ecom_WEB_SKU_STATUS_DETAIL,
+  NVL(sh.CLEARANCE_TYPE_KEY, -1) AS ECOM_WEB_SKU_CLEAR_TYPE_KEY,
+  sh.CHAIN_KEY AS ECOM_WEBSTORE_KEY,
+  NVL(sh.DATE_FROM_KEY, -1) AS ECOM_WEB_SKU_EFF_DATE_KEY,
+  NVL(sh.DATE_TO_KEY, -1) AS ECOM_WEB_SKU_END_DATE_KEY,
+  NVL(FIRST_ACTIVE_DATE_KEY, -1) AS ECOM_WEB_SKU_FIRST_ACT_DT_KEY,
+  NVL(LAST_ACTIVE_DATE_KEY, -1) AS ECOM_WEB_SKU_LAST_ACT_DT_KEY,
+  MAP_PRICE AS ECOM_WEB_SKU_MAP_PRICE,
+  NVL(FIRST_WEBSTORE_ATP_DATE_KEY, -1) AS ECOM_WEB_SKU_FIRST_ATP_DT_KEY,
+  NVL(LAST_WEBSTORE_ATP_DATE_KEY, -1) AS ECOM_WEB_SKU_LAST_ATP_DT_KEY,
+  CASE BUYABLE_ITEM
+    WHEN '0' THEN 'N'
+    ELSE 'Y'
+  END AS ECOM_WEB_SKU_BUYABLE,
+  CASE NVL(PUBLISHED_ITEM, PS.PRODUCT_SKU_DISPLAY_FLG)
+    WHEN '0' THEN 'N'
+    ELSE 'Y'
+  END AS ECOM_WEB_SKU_DISPLAYABLE,
+  NVL(BOPIS_FLG, 'N') AS ECOM_WEB_SKU_BOPIS_FLG,
+  NVL(AVAIL_FLG, 'N') AS ECOM_WEB_SKU_ISA_AVAILABLE_FLG,
+  NVL(ATP_INV_FLG, 'N') AS ECOM_WEB_SKU_ATP_FLG,
+  NVL(sa.clearance_flg, 'N') AS ECOM_WEB_SKU_CLEARANCE_GRP,
+  NVL(PRICE_LAST_CHANGE_DATE_KEY, -1) AS ECOM_WEB_SKU_PRICE_UPD_DT_KEY,
+  WEB_PERM_PRICE AS ECOM_WEB_SKU_PERM_PRICE,
+  CASE
+    WHEN WEB_PRICE_QUALIFIER > 1 THEN 'PP (temp)'
+    WHEN
+      sh.WEB_PRICE = sh.list_price
+      AND sh.WEB_PRICE = WEB_PERM_PRICE
+    THEN
+      'List'
+    WHEN NVL(sa.clearance_flg, 'N') = 'Y' THEN 'Clearance'
+    WHEN WEB_PRICE_QUALIFIER = 1 THEN 'Perm'
+    WHEN sh.WEB_PRICE > 0 THEN 'UNK'
+    ELSE '!No Value'
+  END AS ECOM_WEB_SKU_CURR_PRICE_TYPE,
+  WEB_PRICE_START_DTTM AS ECOM_WEB_PRICE_START_DATE,
+  WEB_PRICE_END_DTTM AS ECOM_WEB_PRICE_END_DATE,
+  SA.PROMO_EXCLUSION_GROUP AS ECOM_WEB_SKU_PROMO_EXCL_GRP,
+  NVL(sku_nondisplay_reason, '!No Value') AS web_sku_non_display_reason,
+  ROUND(sh.WEB_PRICE - sh.dks_sku_cost, 2) AS web_sku_price_avg_COst_margin,
+  ROUND(sh.WEB_PRICE - sh.dks_sku_curr_cost, 2) AS web_sku_price_curr_COst_margin,
+  product_key,
+  CASE
+    WHEN
+      SA.WCS_SKU_HAS_ATTRIBUTES_IND = 0
+      AND NVL(ps.record_status, 'D') = 'D'
+    THEN
+      'D'
+    WHEN ps.record_Status = 'A' THEN 'A'
+    ELSE sh.record_status
+  END AS WCS_STATUS,
+  CASE
+    WHEN sh.WEB_PRICE < MAP_PRICE THEN 'Y'
+    ELSE 'N'
+  END AS ECOM_WEB_SKU_PRICE_IN_CART_FLG,
+  CASE
+    WHEN dks_sku_curr_cost > sh.WEB_PRICE THEN 'Y'
+    ELSE 'N'
+  END AS NEGATIVE_CURR_COST_MARGIN,
+  CASE
+    WHEN sh.dks_sku_cost > sh.WEB_PRICE THEN 'Y'
+    ELSE 'N'
+  END AS NEGATIVE_AVG_COST_MARGIN,
+  NVL(col.clr_color_desc, '!No Value') AS ECOM_WEB_SKU_CLR_COLOR,
+  CASE
+    WHEN
+      dksu.web_atp_qty > 0
+      AND SH.DISCONTINUED_FLG = 'A'
+    THEN
+      'Y'
+    ELSE 'N'
+  END AS ECOM_WEB_SKU_SW_ELIG_FLG,
+  ecom.custom_concat_ifnull(
+    ARRAY(ppe.event_id, ':', ppe.event_desc)
+  ) AS ECOM_WEB_SKU_OFFER_PRICE_EVENT,
+  NVL(PEG.SW_ELIGIBLE_FLG, 'Y') AS SW_ELIGIBLE_FLG,
+  NVL(BOPL_FLG, 'N') AS ECOM_WEB_SKU_BOPL_FLG,
+  ps.min_purch_qty,
+  ps.max_purch_qty
+FROM
+  ecom_dim.WEB_SKU_HEADER AS SH
+    LEFT JOIN ecom_dim.WEB_SKU_ATTR AS SA
+      ON SA.web_Sku_key = sh.web_sku_key
+    LEFT JOIN ecom_Dim.pim_sku AS ps
+      ON sh.dks_Sku_key = ps.dks_sku_key
+      AND CASE sh.chain_key
+        WHEN 8 THEN 6
+        ELSE sh.chain_key
+      END = ps.webstore_key
+    LEFT JOIN (
+      SELECT
+        *
+      FROM
+        ECOM_DIM.BRIDGE_WEB_SKU_PRODUCT
+      WHERE
+        is_current = 'C'
+        AND chain_key IN (2, 4, 6, 7, 8)
+        AND linked_pid_priority = 1
+    ) AS wp
+      ON sh.web_sku_key = wp.web_sku_key
+    LEFT JOIN ecom_Dim.clr_color_lkup AS col
+      ON sh.clr_color_code = col.clr_color_code
+    LEFT JOIN ecom_Dim.dks_SKU_units AS dksu
+      ON sh.dks_SKU_key = dksu.dks_SKU_key
+    LEFT JOIN (
+      SELECT DISTINCT
+        PAGE_VERSION_ID,
+        MAX(event_id) AS event_id
+      FROM
+        ECOM.PPS_EVENT_PAGE_VER_BLK_CONTENT
+      GROUP BY
+        PAGE_VERSION_ID
+    ) AS ppsp
+      ON sh.web_price_qualifier = PPSP.PAGE_VERSION_ID
+    LEFT JOIN ECOM.PPS_EVENT AS ppe
+      ON ppe.event_id = PPSP.event_id
+    LEFT JOIN ECOM_DIM.PROMO_EXCLUSION_GRP_LKUP AS peg
+      ON ecom_dim.GET_NUMBER_FROM_STRING(SA.PROMO_EXCLUSION_GROUP) = PEG.PROMO_EXCLUSION_GRP_ID
+WHERE
+  sh.chain_key IN (2, 6, 7, 8)
+  AND sh.dks_SKU_key > 0

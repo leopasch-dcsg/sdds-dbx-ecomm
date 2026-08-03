@@ -1,0 +1,5 @@
+variables:
+  lineup_mysql_jdbc_url:
+    default: "jdbc:mysql://mysql-lineup-ue-np-1.mysql.database.azure.com:3306/ecom_dim?connectTimeout=30000&socketTimeout=600000&tcpKeepAlive=true&rewriteBatchedStatements=true&sessionVariables=time_zone='%2B00:00'"
+  lineup_mysql_jdbc_host:
+    default: "mysql-lineup-ue-np-1.mysql.database.azure.com"

@@ -1,0 +1,97 @@
+variables:
+  co_stage_schema:
+    default: "co_stage"
+
+  # For the CO_STAGE tables, the non-prod topics contain garbage data that is not usable
+  # so we are forced to ingest data in Databricks non-prod from prod topics.
+  co_stage_kafka_jaas_config_secret_key:
+    default: ecmde-kafka-jaas-config
+  co_stage_kafka_schema_registry_user_key:
+    default: ecmde-kafka-registry-user
+  co_stage_kafka_schema_registry_password_key:
+    default: ecmde-kafka-registry-password
+  co_stage_kafka_task_timeout_seconds:
+    default: 2700
+
+  co_stage_order_message_cancel_bronze_table_name:
+    default: co_stage_order_message_cancel_dlt
+  co_stage_order_message_cancel_bronze_table_comment:
+    default: "Kafka raw data for ddw co athlete orders cancelled topic."
+  co_stage_order_message_cancel_topic:
+    default: ddw-co-athlete-orders-cx2
+  co_stage_order_message_cancel_registry_value_subject:
+    default: ddw-co-athlete-orders-cx2-value
+  co_stage_order_message_cancel_registry_key_subject:
+    default: ddw-co-athlete-orders-cx2-key
+  co_stage_order_message_cancel_silver_quarantine_table_name:
+    default: co_stage_order_message_cancel_quarantine
+  co_stage_order_message_cancel_silver_table_name:
+    default: co_stage_order_message_cancel
+  co_stage_order_message_cancel_stage_table_name:
+    default: order_message_cancel
+
+  co_stage_order_message_fulfill_bronze_table_name:
+    default: co_stage_order_message_fulfill_dlt
+  co_stage_order_message_fulfill_bronze_table_comment:
+    default: "Kafka raw data for ddw co athlete orders fulfill topic."
+  co_stage_order_message_fulfill_topic:
+    default: ddw-co-athlete-orders-fulfill2
+  co_stage_order_message_fulfill_registry_value_subject:
+    default: ddw-co-athlete-orders-fulfill2-value
+  co_stage_order_message_fulfill_registry_key_subject:
+    default: ddw-co-athlete-orders-fulfill2-key
+  co_stage_order_message_fulfill_silver_quarantine_table_name:
+    default: co_stage_order_message_fulfill_quarantine
+  co_stage_order_message_fulfill_silver_table_name:
+    default: co_stage_order_message_fulfill
+  co_stage_order_message_fulfill_stage_table_name:
+    default: order_message_fulfill
+
+  co_stage_order_message_placed_table_name:
+    default: co_stage_order_message_placed_dlt
+  co_stage_order_message_placed_table_comment:
+    default: "Kafka raw data for ddw co athlete orders placed topic."
+  co_stage_order_message_placed_topic:
+    default: ddw-co-athlete-orders-placed2
+  co_stage_order_message_placed_registry_key_subject:
+    default: ddw-co-athlete-orders-placed2-key
+  co_stage_order_message_placed_registry_value_subject:
+    default: ddw-co-athlete-orders-placed2-value
+  co_stage_order_message_placed_silver_quarantine_table_name:
+    default: co_stage_order_message_placed_quarantine
+  co_stage_order_message_placed_silver_table_name:
+    default: co_stage_order_message_placed
+  co_stage_order_message_placed_stage_table_name:
+    default: order_message_placed
+
+  co_stage_order_message_placed_pay_table_name:
+    default: co_stage_order_message_placed_payment_dlt
+  co_stage_order_message_placed_pay_table_comment:
+    default: "Kafka raw data for ddw co athlete orders placed pay topic."
+  co_stage_order_message_placed_pay_topic:
+    default: ddw-co-athlete-orders-placed-pay
+  co_stage_order_message_placed_pay_registry_key_subject:
+    default: ddw-co-athlete-orders-placed-pay-key
+  co_stage_order_message_placed_pay_registry_value_subject:
+    default: ddw-co-athlete-orders-placed-pay-value
+  co_stage_order_message_placed_pay_bronze_table_name:
+    default: co_stage_order_message_placed_payment_dlt
+  co_stage_order_message_placed_pay_silver_table_name:
+    default: co_stage_order_message_placed_payment
+  co_stage_order_message_placed_pay_stage_table_name:
+    default: order_message_placed_payment
+
+  co_stage_order_message_discount_bronze_table_name:
+    default: co_stage_order_message_discount_dlt
+  co_stage_order_message_discount_table_comment:
+    default: "Kafka raw data for ddw co athlete orders discounts topic."
+  co_stage_order_message_discount_silver_table_name:
+    default: co_stage_order_message_discount
+  co_stage_order_message_discount_stage_table_name:
+    default: order_message_discount
+  co_stage_order_message_discount_topic:
+    default: ddw-co-discounts
+  co_stage_order_message_discount_registry_key_subject:
+    default: ddw-co-discounts-key
+  co_stage_order_message_discount_registry_value_subject:
+    default: ddw-co-discounts-value

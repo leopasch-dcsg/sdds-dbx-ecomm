@@ -1,0 +1,32 @@
+variables:
+  missing_image_mysql_jdbc_url:
+    default: "jdbc:mysql://mysql-catalog-preview-ue-p-1.mysql.database.azure.com:3306/service_instance_db?serverTimezone=UTC&useSSL=true&requireSSL=false&allowMultiQueries=true"
+
+  # Azure Key Vault secret key names for MySQL credentials.
+  # Override per environment in databricks.yml targets if different secrets are used in each env.
+  missing_image_mysql_username_key:
+    default: "lineup-mysql-user"  # TODO: replace with the actual KV secret key for MySQL catalog username
+
+  missing_image_mysql_password_key:
+    default: "lineup-mysql-password"  # TODO: replace with the actual KV secret key for MySQL catalog password
+
+  # Column used to track incremental changes. Adjust if source tables use a different audit column.
+  missing_image_mysql_watermark_column:
+    default: "updated_at"
+
+  missing_image_bronze_catalog:
+    default: "dev_ent_bronze_db"
+
+  missing_image_bronze_schema:
+    default: "service_instance"
+
+  # Watermark table must exist in the destination catalog/schema before the first run.
+  # Run the DDL in flyway/bronze/ddl/ to create it if it doesn't exist.
+  missing_image_watermark_table_name:
+    default: "dev_ent_bronze_db.service_instance.watermarks"
+
+  bypass_ecode_image_check_table_name:
+    default: "bypass_ecode_image_check"
+
+  bypass_color_image_check_table_name:
+    default: "bypass_color_image_check"

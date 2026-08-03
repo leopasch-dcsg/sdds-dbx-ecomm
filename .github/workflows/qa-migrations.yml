@@ -1,0 +1,54 @@
+name: Apply flyway migrations against QA
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  bronze_ddl_migrations:
+    uses: ./.github/workflows/apply-flyway-migration.yml
+    with:
+      DBX_ENV: "qa"
+      VAULT_PATH: concourse/data-e-commerce/databricks/qa
+      CONNECTION_CATALOG: qa_ent_bronze_db
+      MIGRATION_PATH: flyway/bronze/ddl
+      DEFAULT_SCHEMA: "ecmde"
+      BASELINE_VERSION: 1
+      OSO_SILVER_CATALOG: "qa_ent_silver_db"
+    secrets: inherit
+
+  silver_ddl_migrations:
+    uses: ./.github/workflows/apply-flyway-migration.yml
+    with:
+      DBX_ENV: "qa"
+      VAULT_PATH: concourse/data-e-commerce/databricks/qa
+      CONNECTION_CATALOG: qa_ent_silver_db
+      MIGRATION_PATH: flyway/silver/ddl
+      DEFAULT_SCHEMA: "ecmde"
+      BASELINE_VERSION: 1
+      OSO_SILVER_CATALOG: "qa_ent_silver_db"
+    secrets: inherit
+
+  gold_ddl_migrations:
+    uses: ./.github/workflows/apply-flyway-migration.yml
+    with:
+      DBX_ENV: "qa"
+      VAULT_PATH: concourse/data-e-commerce/databricks/qa
+      CONNECTION_CATALOG: qa_ent_gold_db
+      MIGRATION_PATH: flyway/gold/ddl
+      DEFAULT_SCHEMA: "ecm"
+      BASELINE_VERSION: 1
+      OSO_SILVER_CATALOG: "qa_ent_silver_db"
+    secrets: inherit
+
+  ecomp_ddl_migrations:
+    uses: ./.github/workflows/apply-flyway-migration.yml
+    with:
+      DBX_ENV: "qa"
+      VAULT_PATH: concourse/data-e-commerce/databricks/qa
+      CONNECTION_CATALOG: qa_ecmde_db
+      MIGRATION_PATH: flyway/ecomp/ddl
+      DEFAULT_SCHEMA: "common"
+      BASELINE_VERSION: 1
+      OSO_SILVER_CATALOG: "qa_ent_silver_db"
+    secrets: inherit

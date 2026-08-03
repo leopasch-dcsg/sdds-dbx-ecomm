@@ -1,0 +1,36 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+*.egg-info/
+
+# Mac OS
+*.DS_Store
+
+# VS Code
+*.vscode/
+*.code-workspace/
+
+
+#IntelliJ
+*.idea/
+
+# Jupyter Notebook
+*.ipynb_checkpoints/
+
+# data files (un-comment as needed)
+# *.csv
+# *.pkl
+# *.json
+# *.joblib*
+
+# Virtual Environment
+.venv/
+venv/
+build/
+dist/
+env/
+
+#databricks
+**/.databricks
+.coverage
+coverage.xml

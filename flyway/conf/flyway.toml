@@ -1,0 +1,36 @@
+[environments.local]
+url = "jdbc:databricks://adb-7098146655993014.14.azuredatabricks.net:443;ConnCatalog=dev_ecmde_db;transportMode=http;ssl=1;httpPath=/sql/1.0/warehouses/b5678626ad95538b;EnableArrow=0;AuthMech=11;Auth_Flow=0;Auth_AccessToken=${env.JDBC_ACCESS_TOKEN};"
+
+[environments.dev]
+url = "jdbc:databricks://adb-7098146655993014.14.azuredatabricks.net:443;ConnCatalog=${env.CONNECTION_CATALOG};transportMode=http;ssl=1;httpPath=/sql/1.0/warehouses/b5678626ad95538b;EnableArrow=0;AuthMech=11;Auth_Flow=0;Auth_AccessToken=${env.JDBC_ACCESS_TOKEN};"
+
+[environments.qa]
+url = "jdbc:databricks://adb-1385312813035376.16.azuredatabricks.net:443;ConnCatalog=${env.CONNECTION_CATALOG};transportMode=http;ssl=1;httpPath=/sql/1.0/warehouses/bf3b217612e15a19;EnableArrow=0;AuthMech=11;Auth_Flow=0;Auth_AccessToken=${env.JDBC_ACCESS_TOKEN};"
+
+[environments.prod]
+url = "jdbc:databricks://adb-3759157064858225.5.azuredatabricks.net:443;ConnCatalog=${env.CONNECTION_CATALOG};transportMode=http;ssl=1;httpPath=/sql/1.0/warehouses/d559985a75b81d3c;EnableArrow=0;AuthMech=11;Auth_Flow=0;Auth_AccessToken=${env.JDBC_ACCESS_TOKEN};"
+
+
+[flyway]
+mixed = true
+outOfOrder = true
+validateMigrationNaming = true
+cleanDisabled = true
+baselineOnMigrate = true
+
+[flyway.placeholders]
+co_stage_schema="co_stage"
+sb_load_schema="sb_load"
+common_schema="common"
+ecom_dim_schema = "ecom_dim"
+oso_silver_catalog="prod_ent_silver_db"
+oso_db_catalog="prod_oso_db"
+ecom_schema="ecom"
+ecomp_catalog="prod_ecmde_db"
+domp_schema="domp"
+ecom_apps_schema= "ecom_apps"
+web_stage_schema= "web_stage"
+web_ops_schema= "web_ops"
+
+
+

@@ -1,0 +1,48 @@
+variables:
+  oso_source_catalog:
+    default: "dev_ent_silver_db"
+
+  oso_source_schema:
+    default: "oso"
+
+  fit_source_catalog:
+    default: "dev_ent_silver_db"
+  
+  ecom_schema:
+    default: "ecom"
+
+  ecm_rw_oracle_schema:
+    default: "ecm_rw"
+
+  ecm_rw_username:
+    default: "ecm_rw"
+
+  ecm_rw_password_key:
+    default: "ecm-rw-dev"
+
+  oso_order_sku_source_table_name:
+    default: newman_item
+
+  oso_order_sku_silver_table_name:
+    default: stg_oso_order_sku
+
+  oso_order_fulfill_source_table_name:
+    default: newman_item
+
+  oso_order_fulfill_silver_table_name:
+    default: stg_oso_order_fulfill
+
+  oso_order_sku_init_alloc_silver_table_name:
+    default: stg_oso_order_sku_init_alloc
+
+  oso_order_sku_shipment_silver_table_name:
+    default: stg_oso_order_sku_shipment
+
+  oso_order_header_silver_table_name:
+    default: stg_oso_order_header
+
+  oso_order_delivery_silver_table_name:
+    default: stg_oso_order_delivery
+
+  oso_txn_order_sku_silver_table_name:
+    default: stg_oso_txn_order_sku

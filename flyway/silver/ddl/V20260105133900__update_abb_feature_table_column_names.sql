@@ -1,0 +1,80 @@
+ALTER TABLE ltr_stg_atc_joined_impressions ADD COLUMN impression_count BIGINT AFTER ecode;
+
+ALTER TABLE ltr_stg_atc_search_ecodes_with_all_dates ADD COLUMN impression_count BIGINT AFTER ecode;
+
+ALTER TABLE ltr_stg_atc_agg_impressions ADD COLUMN total_impressions_last_x_days BIGINT AFTER time_decay_total_impressions_last_x_days;
+
+ALTER TABLE ltr_stg_atc_init_priors ADD COLUMN total_impressions_last_x_days BIGINT AFTER time_decay_total_impressions_last_x_days;
+
+ALTER TABLE ltr_stg_atc_alphas_and_betas ADD COLUMN total_impressions_last_x_days BIGINT AFTER time_decay_total_impressions_last_x_days;
+
+ALTER TABLE ltr_stg_atc_posteriors ADD COLUMN total_impressions_last_x_days BIGINT AFTER time_decay_total_impressions_last_x_days;
+
+ALTER TABLE ltr_abb_atc_rate RENAME column time_decay_total_atc_last_x_days to total_atc_last_x_days;
+ALTER TABLE ltr_abb_atc_rate RENAME column time_decay_total_impressions_last_x_days to total_impressions_last_x_days;
+ALTER TABLE ltr_abb_atc_rate RENAME column time_decay_prior_atc_rate to prior_atc_rate;
+ALTER TABLE ltr_abb_atc_rate RENAME column time_decay_prior_alpha to prior_alpha;
+ALTER TABLE ltr_abb_atc_rate RENAME column time_decay_prior_beta to prior_beta;
+ALTER TABLE ltr_abb_atc_rate RENAME column time_decay_alpha_n to alpha_n;
+ALTER TABLE ltr_abb_atc_rate RENAME column time_decay_beta_n to beta_n;
+ALTER TABLE ltr_abb_atc_rate RENAME column time_decay_atc_rate_posterior to atc_rate_posterior;
+ALTER TABLE ltr_abb_atc_rate RENAME column time_decay_prior_atc_rate_std to prior_atc_rate_std;
+ALTER TABLE ltr_abb_atc_rate RENAME column time_decay_atc_rate_posterior_z_score to atc_rate_posterior_z_score;
+ALTER TABLE ltr_abb_atc_rate RENAME column time_decay_signed_kl_divergence to signed_kl_divergence;
+ALTER TABLE ltr_abb_atc_rate RENAME column time_decay_signed_js_divergence_shifted to signed_js_divergence_shifted;
+
+ALTER TABLE ltr_stg_joined_impressions ADD COLUMN impression_count BIGINT AFTER ecode;
+
+ALTER TABLE ltr_stg_search_ecodes_with_all_dates ADD COLUMN impression_count BIGINT AFTER ecode;
+
+ALTER TABLE ltr_stg_agg_impressions ADD COLUMN total_impressions_last_x_days BIGINT AFTER time_decay_total_impressions_last_x_days;
+
+ALTER TABLE ltr_stg_init_priors ADD COLUMN total_impressions_last_x_days BIGINT AFTER time_decay_total_impressions_last_x_days;
+
+ALTER TABLE ltr_stg_alphas_and_betas ADD COLUMN total_impressions_last_x_days BIGINT AFTER time_decay_total_impressions_last_x_days;
+
+ALTER TABLE ltr_stg_posteriors ADD COLUMN total_impressions_last_x_days BIGINT AFTER time_decay_total_impressions_last_x_days;
+
+ALTER TABLE ltr_abb_ctr RENAME column time_decay_total_clicks_last_x_days to total_clicks_last_x_days;
+ALTER TABLE ltr_abb_ctr RENAME column time_decay_total_impressions_last_x_days to total_impressions_last_x_days;
+ALTER TABLE ltr_abb_ctr RENAME column time_decay_prior_ctr to prior_ctr;
+ALTER TABLE ltr_abb_ctr RENAME column time_decay_prior_alpha to prior_alpha;
+ALTER TABLE ltr_abb_ctr RENAME column time_decay_prior_beta to prior_beta;
+ALTER TABLE ltr_abb_ctr RENAME column time_decay_alpha_n to alpha_n;
+ALTER TABLE ltr_abb_ctr RENAME column time_decay_beta_n to beta_n;
+ALTER TABLE ltr_abb_ctr RENAME column time_decay_ctr_posterior to ctr_posterior;
+ALTER TABLE ltr_abb_ctr RENAME column time_decay_prior_ctr_std to prior_ctr_std;
+ALTER TABLE ltr_abb_ctr RENAME column time_decay_ctr_posterior_z_score to ctr_posterior_z_score;
+ALTER TABLE ltr_abb_ctr RENAME column time_decay_signed_kl_divergence to signed_kl_divergence;
+ALTER TABLE ltr_abb_ctr RENAME column time_decay_signed_js_divergence_shifted to signed_js_divergence_shifted;
+
+ALTER TABLE ltr_stg_order_rate_joined_impressions ADD COLUMN impression_count BIGINT AFTER ecode;
+
+ALTER TABLE ltr_stg_order_rate_search_ecodes_with_all_dates ADD COLUMN impression_count BIGINT AFTER ecode;
+
+ALTER TABLE ltr_stg_order_rate_agg_impressions ADD COLUMN total_impressions_last_x_days BIGINT AFTER time_decay_total_impressions_last_x_days;
+
+ALTER TABLE ltr_stg_order_rate_init_priors ADD COLUMN total_impressions_last_x_days BIGINT AFTER time_decay_total_impressions_last_x_days;
+
+ALTER TABLE ltr_stg_order_rate_alphas_and_betas ADD COLUMN total_impressions_last_x_days BIGINT AFTER time_decay_total_impressions_last_x_days;
+
+ALTER TABLE ltr_stg_order_rate_posteriors ADD COLUMN total_impressions_last_x_days BIGINT AFTER time_decay_total_impressions_last_x_days;
+
+ALTER TABLE ltr_abb_order_rate RENAME column time_decay_total_orders_last_x_days to total_orders_last_x_days;
+ALTER TABLE ltr_abb_order_rate RENAME column time_decay_total_impressions_last_x_days to total_impressions_last_x_days;
+ALTER TABLE ltr_abb_order_rate RENAME column time_decay_prior_order_rate to prior_order_rate;
+ALTER TABLE ltr_abb_order_rate RENAME column time_decay_prior_alpha to prior_alpha;
+ALTER TABLE ltr_abb_order_rate RENAME column time_decay_prior_beta to prior_beta;
+ALTER TABLE ltr_abb_order_rate RENAME column time_decay_alpha_n to alpha_n;
+ALTER TABLE ltr_abb_order_rate RENAME column time_decay_beta_n to beta_n;
+ALTER TABLE ltr_abb_order_rate RENAME column time_decay_order_rate_posterior to order_rate_posterior;
+ALTER TABLE ltr_abb_order_rate RENAME column time_decay_prior_order_rate_std to prior_order_rate_std;
+ALTER TABLE ltr_abb_order_rate RENAME column time_decay_order_rate_posterior_z_score to order_rate_posterior_z_score;
+ALTER TABLE ltr_abb_order_rate RENAME column time_decay_signed_kl_divergence to signed_kl_divergence;
+ALTER TABLE ltr_abb_order_rate RENAME column time_decay_signed_js_divergence_shifted to signed_js_divergence_shifted;
+
+ALTER TABLE ltr_feature_agg RENAME column ctr_time_decay_signed_js_divergence_shifted to ctr_signed_js_divergence_shifted;
+ALTER TABLE ltr_feature_agg RENAME column atc_rate_time_decay_signed_js_divergence_shifted to atc_rate_signed_js_divergence_shifted;
+ALTER TABLE ltr_feature_agg RENAME column order_rate_time_decay_signed_js_divergence_shifted to order_rate_signed_js_divergence_shifted;
+
+ALTER TABLE ltr_abb_impressions_agg ADD COLUMN impression_count BIGINT AFTER time_decay_impression_count;
