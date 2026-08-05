@@ -1,0 +1,97 @@
+resources:
+  jobs:
+    ecmde-sdds-del-unpub-cats:
+      name: ecmde-sdds-del-unpub-cats
+
+      tags:
+        job-group: "del-unpub-cats"
+        version: ${var.bundle_version}
+
+      permissions:
+        - group_name: ${var.admin_group_name}
+          level: CAN_MANAGE
+        - group_name: ${var.eng_group_name}
+          level: CAN_MANAGE
+        - service_principal_name: ${var.ecmde_sp_id}
+          level: CAN_MANAGE
+        - group_name: ${var.l2_support_group_name}
+          level: CAN_MANAGE_RUN
+        - service_principal_name: ${var.data_platform_sp_id}
+          level: CAN_MANAGE_RUN
+
+      job_clusters:
+        - job_cluster_key: del-unpub-cats-cluster
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            apply_policy_default_values: false
+            policy_id: ${var.job_cluster_policy_id}
+            instance_pool_id: ${var.instance_pool_id}
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+            data_security_mode: USER_ISOLATION
+            runtime_engine: STANDARD
+            autoscale:
+              min_workers: 2
+              max_workers: 5
+            spark_conf:
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              spark.databricks.delta.optimizeWrite.enabled: "true"
+              spark.databricks.delta.autoCompact.enabled: "true"
+            custom_tags:
+              TEAM_CODE: ${var.team_code}
+
+      tasks:
+        - task_key: bronze_ingest_unpublished_categories
+          job_cluster_key: del-unpub-cats-cluster
+          libraries:
+            - whl: ../../dist/*.whl
+            - maven:
+                coordinates: "mysql:mysql-connector-java:8.0.33"
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/sdds_ecomm/notebooks/del_unpub_cats/del_unpub_cats_bronze_notebook
+            base_parameters:
+              azure_kv_scope: ${var.azure_kv_scope}
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              mysql_jdbc_url: ${var.del_unpub_cats_mysql_jdbc_url}
+              mysql_username_key: ${var.del_unpub_cats_mysql_username_key}
+              mysql_password_key: ${var.del_unpub_cats_mysql_password_key}
+              mysql_watermark_column: ${var.del_unpub_cats_mysql_watermark_column}
+              dbx_source_table: ${var.del_unpub_cats_source_table}
+              dbx_destination_catalog: ${var.del_unpub_cats_bronze_catalog}
+              dbx_destination_schema: ${var.del_unpub_cats_bronze_schema}
+              dbx_destination_table: ${var.del_unpub_cats_bronze_table}
+              dbx_merge_watermark_table_name: ${var.del_unpub_cats_watermark_table_name}
+
+        - task_key: silver_latest_unpublished_categories
+          depends_on:
+            - task_key: bronze_ingest_unpublished_categories
+          job_cluster_key: del-unpub-cats-cluster
+          libraries:
+            - whl: ../../dist/*.whl
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/sdds_ecomm/notebooks/del_unpub_cats/del_unpub_cats_silver_notebook
+            base_parameters:
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_bronze_table_qualified: ${var.del_unpub_cats_bronze_catalog}.${var.del_unpub_cats_bronze_schema}.${var.del_unpub_cats_bronze_table}
+              dbx_silver_table_qualified: ${var.del_unpub_cats_silver_catalog}.${var.del_unpub_cats_silver_schema}.${var.del_unpub_cats_silver_table}
+
+        - task_key: gold_deletable_unpublished_categories
+          depends_on:
+            - task_key: silver_latest_unpublished_categories
+          job_cluster_key: del-unpub-cats-cluster
+          libraries:
+            - whl: ../../dist/*.whl
+          notebook_task:
+            notebook_path: ${var.workspace_path_prefix}/src/sdds_ecomm/notebooks/del_unpub_cats/del_unpub_cats_gold_notebook
+            base_parameters:
+              workspace_path_prefix: ${var.workspace_path_prefix}
+              dbx_env: ${var.dbx_env}
+              dbx_user_id: ${workspace.current_user.short_name}
+              dbx_silver_table_qualified: ${var.del_unpub_cats_silver_catalog}.${var.del_unpub_cats_silver_schema}.${var.del_unpub_cats_silver_table}
+              dbx_gold_table_qualified: ${var.del_unpub_cats_gold_catalog}.${var.del_unpub_cats_gold_schema}.${var.del_unpub_cats_gold_table}
+              del_unpub_cats_stale_days: ${var.del_unpub_cats_stale_days}

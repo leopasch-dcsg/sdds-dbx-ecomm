@@ -1,6 +1,6 @@
 bundle:
-  name: ecmde-dbx-ecomm
-
+  name: sdds-dbx-ecomm
+ 
 permissions:
   - group_name: g_az_sf_ecmde_admin
     level: CAN_MANAGE
@@ -8,7 +8,7 @@ permissions:
     level: CAN_MANAGE
   - user_name: ${workspace.current_user.userName}
     level: CAN_MANAGE
-
+ 
 include:
   - config/common/variables.yml
   # - config/common/callable-jobs.yml
@@ -19,6 +19,8 @@ include:
   # - config/ecomp/eat-availability-variables.yml
   - config/ecomp/missing-image-jobs.yml
   - config/ecomp/missing-image-variables.yml
+  - config/ecomp/del-unpub-cats-jobs.yml
+  - config/ecomp/del-unpub-cats-variables.yml
   # - config/fulfillment/dmd-decomp-rpt-job.yml
   # - config/fulfillment/dmd-decomp-rpt-job.yml
   #- config/fulfillment/dmd-decomp-rpt-variables.yml
@@ -40,13 +42,13 @@ include:
   # - config/search/vs-dbx-variables.yml
   # - config/inventory/inventory-variables.yml
   # - config/inventory/inventory-es-ingest-jobs.yml
-
+ 
 artifacts:
   default:
     type: whl
-    build: python3 -m build
+    build: python -m build
     path: .
-
+ 
 targets:
   local:
     presets:
@@ -58,34 +60,33 @@ targets:
     default: true
     workspace:
       host: https://adb-7098146655993014.14.azuredatabricks.net/
-    variables:
+    # variables:
       # When testing locally, you need to override the values below to point to your sandbox schemas. This is not an
       # exhaustive list of variables that need to be overridden, but a sample of some of the common ones.
-      ecmde_bronze_catalog: "dev_ecmde_db"
-      ecmde_silver_catalog: "dev_ecmde_db"
-      ecmde_gold_catalog: "dev_ecmde_db"
-      ecom_schema: "lpaschoal_gold"
-      ecmde_bronze_schema: "mseagrave_bronze"
-      ecmde_silver_schema: "vmukkamalla_silver"
-      ecmde_gold_schema: "vmukkamalla_gold"
-      sb_load_schema: "lpaschoal_ecomp"
-      co_stage_schema: "lpaschoal_gold"
-      ecomp_watermark_table_name: "dev_ecmde_db.lpaschoal_ecomp.watermarks"
-      ltr_source_catalog: "dev_ecmde_db"
-      ltr_source_schema: "lpaschoal_silver"
-      ltr_destination_catalog: "dev_ecmde_db"
-      ltr_destination_schema: "lpaschoal_silver"
-
-      oso_source_catalog: "dev_ent_silver_db"
-      fit_source_catalog: "dev_ent_silver_db"
-      oso_source_schema: "oso"
-
-      ecomp_catalog: "dev_ecmde_db"
-      common_schema: "lpaschoal_silver"
-      ecom_dim_schema: "lpaschoal_gold"
-      dq_config_table: "dev_ecmde_db.common.dq_rule_config"
-      dq_result_table: "dev_ecmde_db.common.dq_check_result"
-      dq_summary_table: "dev_ecmde_db.common.dq_run_summary"
+      # ecmde_bronze_catalog: "dev_ecmde_db"
+      # ecmde_silver_catalog: "dev_ecmde_db"
+      # ecmde_gold_catalog: "dev_ecmde_db"
+      # ecom_schema: "lpaschoal_gold"
+      # ecmde_bronze_schema: "mseagrave_bronze"
+      # ecmde_silver_schema: "vmukkamalla_silver"
+      # ecmde_gold_schema: "vmukkamalla_gold"
+      # sb_load_schema: "lpaschoal_ecomp"uu
+      # co_stage_schema: "lpaschoal_gold"
+      # ecomp_watermark_table_name: "dev_ecmde_db.lpaschoal_ecomp.watermarks"
+      # ltr_source_catalog: "dev_ecmde_db"
+      # ltr_source_schema: "lpaschoal_silver"
+      # ltr_destination_catalog: "dev_ecmde_db" #BHASKAR
+      # ltr_destination_schema: "lpaschoal_silver"
+ 
+      # oso_source_catalog: "dev_ent_silver_db"
+      # fit_source_catalog: "dev_ent_silver_db"
+      # oso_source_schema: "oso"
+ 
+      # ecomp_catalog: "dev_ecmde_db"
+      # common_schema: "lpaschoal_silver" bhaskar
+      # dq_config_table: "dev_ecmde_db.common.dq_rule_config"
+      # dq_result_table: "dev_ecmde_db.common.dq_check_result"
+      # dq_summary_table: "dev_ecmde_db.common.dq_run_summary"
   development:
     presets:
       tags:
@@ -93,11 +94,11 @@ targets:
         env: "development"
     workspace:
       host: https://adb-7098146655993014.14.azuredatabricks.net/
-    variables:
-      dq_config_table: "dev_ecmde_db.common.dq_rule_config"
-      dq_result_table: "dev_ecmde_db.common.dq_check_result"
-      dq_summary_table: "dev_ecmde_db.common.dq_run_summary"
-
+    # variables:
+    #   dq_config_table: "dev_ecmde_db.common.dq_rule_config"
+    #   dq_result_table: "dev_ecmde_db.common.dq_check_result"
+    #   dq_summary_table: "dev_ecmde_db.common.dq_run_summary"
+ 
   qa:
     presets:
       tags:
@@ -121,7 +122,7 @@ targets:
       eat_availability_kafka_schema_registry_password_key: "ecmde-kafka-registry-password"
       ecomp_jdbc_url: "jdbc:oracle:thin:@dkha2121.dcsg.com:1521/ecomq"
       ecm_rw_password_key: "ecm-rw"
-      ltr_destination_catalog: "qa_ent_silver_db"
+      # ltr_destination_catalog: "qa_ent_silver_db" #BHASKAR
       ltr_source_catalog: "qa_ent_silver_db"
       ltr_kafka_topic: ecmde-ltr-features-qa
       ltr_schema_key_subject: ecmde-ltr-features-qa-key
@@ -143,6 +144,11 @@ targets:
       dq_config_table: "qa_ecmde_db.common.dq_rule_config"
       dq_result_table: "qa_ecmde_db.common.dq_check_result"
       dq_summary_table: "qa_ecmde_db.common.dq_run_summary"
+      # sdds_ecomm projects — all land in qa_sdsc_db.sdds
+      del_unpub_cats_bronze_catalog: "qa_sdsc_db"
+      del_unpub_cats_silver_catalog: "qa_sdsc_db"
+      del_unpub_cats_gold_catalog: "qa_sdsc_db"
+      del_unpub_cats_watermark_table_name: "qa_sdsc_db.sdds.watermarks"
 
   production:
     presets:
@@ -172,7 +178,7 @@ targets:
       co_stage_kafka_schema_registry_password_key: "ecmde-kafka-registry-password"
       ecomp_jdbc_url: "jdbc:oracle:thin:@dkha0121.dcsg.com:1521/ecomp"
       ecm_rw_password_key: "ecm-rw"
-      ltr_destination_catalog: "prod_ent_silver_db"
+      # ltr_destination_catalog: "prod_ent_silver_db"  #BHASKAR
       ltr_source_catalog: "prod_ent_silver_db"
       bq_destination_bucket: prod-dbx-gcp-ecom-ddw-bucket
       bq_destination_project_id: gp-ddw-project01
@@ -184,9 +190,14 @@ targets:
       dq_config_table: "prod_ecmde_db.common.dq_rule_config"
       dq_result_table: "prod_ecmde_db.common.dq_check_result"
       dq_summary_table: "prod_ecmde_db.common.dq_run_summary"
+      # sdds_ecomm projects — all land in prod_sdsc_db.sdds
+      del_unpub_cats_bronze_catalog: "prod_sdsc_db"
+      del_unpub_cats_silver_catalog: "prod_sdsc_db"
+      del_unpub_cats_gold_catalog: "prod_sdsc_db"
+      del_unpub_cats_watermark_table_name: "prod_sdsc_db.sdds.watermarks"
       #lineup_mysql_jdbc_url: "jdbc:mysql://mysql-lineup-ue-np-1.mysql.database.azure.com:3306/ecom_dim?useSSL=true&autoReconnect=true&connectTimeout=30000&socketTimeout=60000"
       #lineup_mysql_jdbc_host: "mysql-lineup-ue-np-1.mysql.database.azure.com"
-
+ 
     resources:
       jobs:
         ecmde-ecomp-bq-egress:
@@ -207,7 +218,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 2700
-
+ 
         ecmde-fulfillment-oracle-egress:
           email_notifications:
             on_failure:
@@ -221,7 +232,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 2700
-
+ 
         ecmde-fulfillment-dmd-decomp:
           email_notifications:
             on_failure:
@@ -235,7 +246,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 1800
-
+ 
         ecmde-ecomp-co-stage-dlt:
           email_notifications:
             on_failure:
@@ -249,7 +260,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-order-message-cancel-silver:
           email_notifications:
             on_failure:
@@ -263,7 +274,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-order-message-cancel-stage:
           email_notifications:
             on_failure:
@@ -277,7 +288,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-order-message-placed-silver:
           email_notifications:
             on_failure:
@@ -291,7 +302,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-order-message-placed-stage:
           email_notifications:
             on_failure:
@@ -305,7 +316,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-order-message-discount-silver:
           email_notifications:
             on_failure:
@@ -319,7 +330,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-order-message-discount-stage:
           email_notifications:
             on_failure:
@@ -333,7 +344,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-order-message-fulfill-silver:
           email_notifications:
             on_failure:
@@ -347,7 +358,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-order-message-fulfill-stage:
           email_notifications:
             on_failure:
@@ -361,7 +372,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-order-message-placed-pay-silver:
           email_notifications:
             on_failure:
@@ -375,7 +386,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-order-message-placed-pay-stage:
           email_notifications:
             on_failure:
@@ -389,7 +400,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-eat-availability-dlt:
           email_notifications:
             on_failure:
@@ -403,7 +414,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-eat-availability-silver:
           email_notifications:
             on_failure:
@@ -417,7 +428,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-nrt-inventory-batch-insert:
           email_notifications:
             on_failure:
@@ -431,7 +442,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-eat-chain-availability-dlt:
           email_notifications:
             on_failure:
@@ -445,7 +456,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-stg-kafka-eat-chain-atp-merge:
           email_notifications:
             on_failure:
@@ -459,7 +470,7 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-fedex-tracking-silver:
           email_notifications:
             on_failure:
@@ -473,9 +484,11 @@ targets:
               - metric: RUN_DURATION_SECONDS
                 op: GREATER_THAN
                 value: 3600
-
+ 
         ecmde-ecomp-bq-exec-sproc:
           email_notifications:
             on_failure:
               - TechPT-DataEcommerce@dcsg.com
               - TCS_DataAnalytics_SupportTeam@dcsg.com
+ 
+ 

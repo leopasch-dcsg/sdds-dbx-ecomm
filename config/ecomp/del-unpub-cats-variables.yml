@@ -1,0 +1,62 @@
+variables:
+  # MySQL source connection for the del_unpub_cats bronze ingest.
+  del_unpub_cats_mysql_jdbc_url:
+    default: "jdbc:mysql://mysql-catalog-preview-ue-p-1.mysql.database.azure.com:3306/service_instance_db?serverTimezone=UTC&useSSL=true&requireSSL=false&allowMultiQueries=true"
+
+  # Azure Key Vault secret key names for MySQL credentials.
+  # Override per environment in databricks.yml targets if different secrets are used in each env.
+  del_unpub_cats_mysql_username_key:
+    default: "lineup-mysql-user"
+
+  del_unpub_cats_mysql_password_key:
+    default: "lineup-mysql-password"
+
+  # Column used to track incremental changes on the source table.
+  del_unpub_cats_mysql_watermark_column:
+    default: "updated_at"
+
+  # Source (MySQL) table name.
+  del_unpub_cats_source_table:
+    default: "unpublished_categories"
+
+  # All sdds_ecomm projects land in the sdsc catalog under the `sdds` schema:
+  # dev_sdsc_db.sdds / qa_sdsc_db.sdds / prod_sdsc_db.sdds. Only catalog is
+  # overridden per target in databricks.yml; the schema stays `sdds`.
+
+  # Bronze destination
+  del_unpub_cats_bronze_catalog:
+    default: "dev_sdsc_db"
+
+  del_unpub_cats_bronze_schema:
+    default: "sdds"
+
+  del_unpub_cats_bronze_table:
+    default: "unpublished_categories"
+
+  # Silver destination
+  del_unpub_cats_silver_catalog:
+    default: "dev_sdsc_db"
+
+  del_unpub_cats_silver_schema:
+    default: "sdds"
+
+  del_unpub_cats_silver_table:
+    default: "unpublished_categories_latest"
+
+  # Gold destination
+  del_unpub_cats_gold_catalog:
+    default: "dev_sdsc_db"
+
+  del_unpub_cats_gold_schema:
+    default: "sdds"
+
+  del_unpub_cats_gold_table:
+    default: "deletable_unpublished_categories"
+
+  # Watermark table must exist in the sdds catalog/schema before the first run.
+  del_unpub_cats_watermark_table_name:
+    default: "dev_sdsc_db.sdds.watermarks"
+
+  # Number of days a category must remain unpublished before it is flagged for deletion.
+  del_unpub_cats_stale_days:
+    default: "30"
