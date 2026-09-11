@@ -19,12 +19,30 @@ variables:
     default: 1de7e71c-3e09-4ce0-ac86-755bc5365019
   ecmde_sp_id:
     default: 723f0b6e-b3c9-4ebf-b7a6-9175080fe198
+  sdds_sp_id:
+    default: ""
   admin_group_name:
     default: g_az_sf_ecmde_admin
   eng_group_name:
     default: g_az_sf_ecmde_engineers
+  ecmde_admin_group_name:
+    default: g_az_sf_ecmde_admin
+  ecmde_eng_group_name:
+    default: g_az_sf_ecmde_engineers
   l2_support_group_name:
     default: TCS_DataAnalytics_SupportTeam
+
+  sdds_catalog:
+    default: "dev_sdsc_db"
+  sdds_bronze_schema:
+    default: "sdds_bronze"
+  sdds_silver_schema:
+    default: "sdds_silver"
+  sdds_gold_schema:
+    default: "sdds_gold"
+
+  sdds_schedule_pause_status:
+    default: "UNPAUSED"
 
   dlt_cluster_policy_id:
     lookup:
@@ -34,118 +52,3 @@ variables:
     lookup:
       cluster_policy: "DKS Job Compute"
 
-  ml_cluster_policy_id:
-    lookup:
-      cluster_policy: "DKS Job Compute"
-
-  instance_pool_id:
-    lookup:
-      instance_pool: "HR_Standard_D8s_v5"
-
-  instance_pool_D4s:
-    lookup:
-      instance_pool: "HR_Standard_D4s_v5"
-
-  instance_pool_D16s:
-    lookup:
-      instance_pool: "HR_Standard_D16s_v5"
-
-  instance_pool_E16ads:
-    lookup:
-      instance_pool: "HR_Standard_E16ads_v5"
-
-  instance_pool_E20ads:
-    lookup:
-      instance_pool: "HR_Standard_E20ads_v5"
-
-  instance_pool_E32ads:
-    lookup:
-      instance_pool: "HR_Standard_E32ads_v5"
-
-  instance_pool_E16s:
-    lookup:
-      instance_pool: "HR_Standard_E16s_v5"
-
-  instance_pool_E8ads:
-    lookup:
-      instance_pool: "HR_Standard_E8ads_v5"
-
-  instance_pool_L16s:
-    lookup:
-      instance_pool: "HR_Standard_L16s_v3"
-
-  ecomp_catalog:
-    default: "dev_ecmde_db"
-
-  ecomp_watermark_table_name:
-    default: "dev_ecmde_db.common.watermarks"
-
-  ecmde_bronze_catalog:
-    default: "dev_ent_bronze_db"
-
-  ecmde_bronze_schema:
-    default: "ecmde"
-
-  ecmde_silver_catalog:
-    default: "dev_ent_silver_db"
-
-  ecmde_silver_schema:
-    default: "ecmde"
-
-  ecmde_gold_catalog:
-    default: "dev_ent_gold_db"
-
-  ecmde_gold_schema:
-    default: "ecm"
-
-  ecom_dim_schema:
-    default: "ecom_dim"
-
-  entdata_catalog:
-    default: "entdata"
-
-  ecomp_jdbc_url:
-    default: "jdbc:oracle:thin:@//dkha3121.dcsg.com:1521/ecomu"
-
-  # DEV Server: pkc-epzq5.eastus.azure.confluent.cloud:9092
-  # PROD Server: pkc-122rj.eastus.azure.confluent.cloud:9092
-  kafka_bootstrap_servers:
-    default: pkc-epzq5.eastus.azure.confluent.cloud:9092
-  kafka_fail_on_data_loss:
-    default: false
-  kafka_session_timeout_ms:
-    default: 10000
-  kafka_schema_registry_url:
-    default: https://psrc-4j1d2.westus2.azure.confluent.cloud
-  kafka_jaas_config_secret_key:
-    default: ecmde-kafka-jaas-config
-  kafka_schema_registry_user_key:
-    default: ecmde-kafka-registry-user
-  kafka_schema_registry_password_key:
-    default: ecmde-kafka-registry-password
-
-  bq_credentials_project_id:
-    default: gcp-dks-ecmde-sbox
-  bq_credentials_json_credentials_key:
-    default: bq-sa-ecmde-sbox-json-credentials
-  bq_destination_bucket:
-    default: dbx-gcp-ecom-ddw-bucket
-  bq_destination_parent_project_id:
-    default: gcp-dks-ecmde-sbox
-  bq_destination_project_id:
-    default: gn-ddw-project01
-  bq_destination_dataset:
-    default: ecm_incoming
-
-  dq_enabled:
-    default: "true"
-  dq_fail_on_breach:
-    default: "false"
-  dq_xmatters_webhook_secret:
-    default: "xmatters-dq-webhook"
-  dq_config_table:
-    default: "dev_ecmde_db.common.dq_rule_config"
-  dq_result_table:
-    default: "dev_ecmde_db.common.dq_check_result"
-  dq_summary_table:
-    default: "dev_ecmde_db.common.dq_run_summary"

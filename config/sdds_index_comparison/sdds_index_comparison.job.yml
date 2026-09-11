@@ -45,7 +45,6 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/bronze/catalog-load-bronze
             source: WORKSPACE
-          existing_cluster_id: 0715-024748-tnzn2kl2
           max_retries: 3
           min_retry_interval_millis: 900000
           health:
@@ -58,25 +57,29 @@ resources:
               - leonardo.paschoal@dcsg.com
             on_failure:
               - leonardo.paschoal@dcsg.com
+          existing_cluster_id: 0812-152951-77vhlhwi
+
         - task_key: catalog_load_inventory_bronze
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/bronze/catalog-load-inventory-bronze
             source: WORKSPACE
-          existing_cluster_id: 0715-024748-tnzn2kl2
+          existing_cluster_id: 0812-152951-77vhlhwi
+
         - task_key: catalog_load_inventory_silver
           depends_on:
             - task_key: catalog_load_inventory_bronze
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/silver/catalog-load-inventory-silver
             source: WORKSPACE
-          environment_key: catalog_load_silver_environment
+          existing_cluster_id: 0812-152951-77vhlhwi
         - task_key: catalog_load_silver
           depends_on:
             - task_key: catalog_load_bronze
           notebook_task:
-            notebook_path: ${var.workspace_path_prefix}/sdds/sdds_comparison/notebooks/silver/catalog-load-silver
+            notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/silver/catalog-load-silver
             source: WORKSPACE
-          environment_key: catalog_load_silver_environment
+          existing_cluster_id: 0812-152951-77vhlhwi
+
         - task_key: catalog_compare_run_id_style
           depends_on:
             - task_key: catalog_load_inventory_silver
@@ -84,12 +87,12 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/gold/catalog-compare-run-id-style-optimized
             source: WORKSPACE
-          existing_cluster_id: 0903-024418-k1zt56ea
+          existing_cluster_id: 0812-152951-77vhlhwi
+
         - task_key: catalog_stream_bronze
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/bronze/catalog-stream-bronze
             source: WORKSPACE
-          existing_cluster_id: 0702-064343-n3u2hi8y
           max_retries: 3
           min_retry_interval_millis: 900000
           health:
@@ -102,13 +105,16 @@ resources:
               - leonardo.paschoal@dcsg.com
             on_failure:
               - leonardo.paschoal@dcsg.com
+          existing_cluster_id: 0811-215511-4bazq276
+
         - task_key: catalog_stream_silver
           depends_on:
             - task_key: catalog_stream_bronze
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/silver/catalog-stream-silver
             source: WORKSPACE
-          environment_key: catalog_load_silver_environment
+          existing_cluster_id: 0811-215511-4bazq276
+
         - task_key: catalog_compare_run_id_sku
           depends_on:
             - task_key: catalog_load_silver
@@ -117,7 +123,8 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/gold/catalog-compare-run-id-sku-optimized
             source: WORKSPACE
-          existing_cluster_id: 0903-024418-k1zt56ea
+          existing_cluster_id: 0811-215511-4bazq276
+
         - task_key: catalog_email_report_run_sku
           depends_on:
             - task_key: catalog_compare_run_id_sku
@@ -125,6 +132,7 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/gold/catalog-email-report-sku
             source: WORKSPACE
+          existing_cluster_id: 0811-215511-4bazq276
           email_notifications:
             on_success:
               - Jitendra.Patel2@dcsg.com
@@ -142,7 +150,6 @@ resources:
               - Leonardo.Paschoal@dcsg.com
               - Maria.DelCampo@dcsg.com
               - Raghu.Mummadi@dcsg.com
-          environment_key: catalog_load_silver_environment
         - task_key: catalog_email_report_style
           depends_on:
             - task_key: catalog_compare_run_id_sku
@@ -150,6 +157,8 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/gold/catalog-email-report-style
             source: WORKSPACE
+          existing_cluster_id: 0812-152951-77vhlhwi
+
           email_notifications:
             on_success:
               - Jitendra.Patel2@dcsg.com
@@ -167,7 +176,6 @@ resources:
               - Leonardo.Paschoal@dcsg.com
               - Maria.DelCampo@dcsg.com
               - Raghu.Mummadi@dcsg.com
-          environment_key: catalog_load_silver_environment
         - task_key: flat_blended_comparison_gold
           depends_on:
             - task_key: catalog_load_silver
@@ -176,9 +184,9 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/gold/flat_values
             source: WORKSPACE
-          existing_cluster_id: 0903-024418-k1zt56ea
+          environment_key: catalog_load_silver_environment
         - task_key: unpublished_and_deleted_events
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/bronze/unpub_and_deleted_events_mysq_bronze
             source: WORKSPACE
-          existing_cluster_id: 0715-024748-tnzn2kl2
+          existing_cluster_id: 0812-152951-77vhlhwi

@@ -2,9 +2,9 @@ bundle:
   name: sdds-dbx-ecomm
  
 permissions:
-  - group_name: g_az_sf_sdds_admin
+  - group_name: g_az_sf_sdsc_admin
     level: CAN_MANAGE
-  - group_name: g_az_sf_sdds_engineers
+  - group_name: g_az_sf_sdsc_engineers
     level: CAN_MANAGE
   - user_name: ${workspace.current_user.userName}
     level: CAN_MANAGE
@@ -101,9 +101,7 @@ targets:
     #   dq_result_table: "dev_sdds_db.common.dq_check_result"
     #   dq_summary_table: "dev_sdds_db.common.dq_run_summary"
       sdds_catalog: "dev_sdsc_db"
-      sdds_bronze_schema: "sdds_bronze"
-      sdds_silver_schema: "sdds_silver"
-      sdds_gold_schema: "sdds_gold"
+
   qa:
     presets:
       tags:
@@ -113,16 +111,6 @@ targets:
       host: https://adb-1385312813035376.16.azuredatabricks.net/
     variables:
       dbx_env: QA
-
-      ecomp_catalog: "qa_sdds_db"
-      oso_source_catalog: "qa_ent_silver_db"
-      fit_source_catalog: "qa_ent_silver_db"
-      ecomp_watermark_table_name: "qa_sdds_db.common.watermarks"
-      # sdds_ecomm projects — all land in qa_sdsc_db.sdds
-      del_unpub_cats_bronze_catalog: "qa_sdsc_db"
-      del_unpub_cats_silver_catalog: "qa_sdsc_db"
-      del_unpub_cats_gold_catalog: "qa_sdsc_db"
-      del_unpub_cats_watermark_table_name: "qa_sdsc_db.sdds.watermarks"
 
   production:
     presets:
@@ -137,15 +125,7 @@ targets:
       data_platform_sp_id: "7b983771-59e1-4b5a-a05d-85b198de757e"
       sdds_sp_id: "2b2a244a-a0f2-40c9-afaf-7b64b9a39705"
       sdds_catalog: "prod_sdsc_db"
-      sdds_bronze_schema: "sdds_bronze"
-      sdds_silver_schema: "sdds_silver"
-      sdds_gold_schema: "sdds_gold"
-      sdds_watermark_table_name: "prod_sdds_db.common.watermarks"
-      # sdds_ecomm projects — all land in prod_sdsc_db.sdds
-      del_unpub_cats_bronze_catalog: "prod_sdsc_db"
-      del_unpub_cats_silver_catalog: "prod_sdsc_db"
-      del_unpub_cats_gold_catalog: "prod_sdsc_db"
-      del_unpub_cats_watermark_table_name: "prod_sdsc_db.sdds.watermarks"
+
 
  
     resources:
