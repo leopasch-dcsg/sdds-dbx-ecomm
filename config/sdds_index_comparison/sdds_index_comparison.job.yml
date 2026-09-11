@@ -13,6 +13,8 @@ resources:
         - environment_key: catalog_load_silver_environment
           spec:
             environment_version: "5"
+            dependencies:
+              - ../../dist/*.whl
       performance_target: PERFORMANCE_OPTIMIZED
 
       permissions:
@@ -45,6 +47,13 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/bronze/catalog-load-bronze
             source: WORKSPACE
+            base_parameters:
+              sdds_catalog: ${var.sdds_catalog}
+              sdds_bronze_schema: ${var.sdds_bronze_schema}
+              sdds_silver_schema: ${var.sdds_silver_schema}
+              sdds_gold_schema: ${var.sdds_gold_schema}
+          libraries:
+            - whl: ../../dist/*.whl
           max_retries: 3
           min_retry_interval_millis: 900000
           health:
@@ -63,6 +72,13 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/bronze/catalog-load-inventory-bronze
             source: WORKSPACE
+            base_parameters:
+              sdds_catalog: ${var.sdds_catalog}
+              sdds_bronze_schema: ${var.sdds_bronze_schema}
+              sdds_silver_schema: ${var.sdds_silver_schema}
+              sdds_gold_schema: ${var.sdds_gold_schema}
+          libraries:
+            - whl: ../../dist/*.whl
           existing_cluster_id: 0812-152951-77vhlhwi
 
         - task_key: catalog_load_inventory_silver
@@ -71,6 +87,13 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/silver/catalog-load-inventory-silver
             source: WORKSPACE
+            base_parameters:
+              sdds_catalog: ${var.sdds_catalog}
+              sdds_bronze_schema: ${var.sdds_bronze_schema}
+              sdds_silver_schema: ${var.sdds_silver_schema}
+              sdds_gold_schema: ${var.sdds_gold_schema}
+          libraries:
+            - whl: ../../dist/*.whl
           existing_cluster_id: 0812-152951-77vhlhwi
         - task_key: catalog_load_silver
           depends_on:
@@ -78,6 +101,13 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/silver/catalog-load-silver
             source: WORKSPACE
+            base_parameters:
+              sdds_catalog: ${var.sdds_catalog}
+              sdds_bronze_schema: ${var.sdds_bronze_schema}
+              sdds_silver_schema: ${var.sdds_silver_schema}
+              sdds_gold_schema: ${var.sdds_gold_schema}
+          libraries:
+            - whl: ../../dist/*.whl
           existing_cluster_id: 0812-152951-77vhlhwi
 
         - task_key: catalog_compare_run_id_style
@@ -87,12 +117,26 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/gold/catalog-compare-run-id-style-optimized
             source: WORKSPACE
+            base_parameters:
+              sdds_catalog: ${var.sdds_catalog}
+              sdds_bronze_schema: ${var.sdds_bronze_schema}
+              sdds_silver_schema: ${var.sdds_silver_schema}
+              sdds_gold_schema: ${var.sdds_gold_schema}
+          libraries:
+            - whl: ../../dist/*.whl
           existing_cluster_id: 0812-152951-77vhlhwi
 
         - task_key: catalog_stream_bronze
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/bronze/catalog-stream-bronze
             source: WORKSPACE
+            base_parameters:
+              sdds_catalog: ${var.sdds_catalog}
+              sdds_bronze_schema: ${var.sdds_bronze_schema}
+              sdds_silver_schema: ${var.sdds_silver_schema}
+              sdds_gold_schema: ${var.sdds_gold_schema}
+          libraries:
+            - whl: ../../dist/*.whl
           max_retries: 3
           min_retry_interval_millis: 900000
           health:
@@ -113,6 +157,13 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/silver/catalog-stream-silver
             source: WORKSPACE
+            base_parameters:
+              sdds_catalog: ${var.sdds_catalog}
+              sdds_bronze_schema: ${var.sdds_bronze_schema}
+              sdds_silver_schema: ${var.sdds_silver_schema}
+              sdds_gold_schema: ${var.sdds_gold_schema}
+          libraries:
+            - whl: ../../dist/*.whl
           existing_cluster_id: 0811-215511-4bazq276
 
         - task_key: catalog_compare_run_id_sku
@@ -123,6 +174,13 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/gold/catalog-compare-run-id-sku-optimized
             source: WORKSPACE
+            base_parameters:
+              sdds_catalog: ${var.sdds_catalog}
+              sdds_bronze_schema: ${var.sdds_bronze_schema}
+              sdds_silver_schema: ${var.sdds_silver_schema}
+              sdds_gold_schema: ${var.sdds_gold_schema}
+          libraries:
+            - whl: ../../dist/*.whl
           existing_cluster_id: 0811-215511-4bazq276
 
         - task_key: catalog_email_report_run_sku
@@ -132,6 +190,13 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/gold/catalog-email-report-sku
             source: WORKSPACE
+            base_parameters:
+              sdds_catalog: ${var.sdds_catalog}
+              sdds_bronze_schema: ${var.sdds_bronze_schema}
+              sdds_silver_schema: ${var.sdds_silver_schema}
+              sdds_gold_schema: ${var.sdds_gold_schema}
+          libraries:
+            - whl: ../../dist/*.whl
           existing_cluster_id: 0811-215511-4bazq276
           email_notifications:
             on_success:
@@ -157,6 +222,13 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/gold/catalog-email-report-style
             source: WORKSPACE
+            base_parameters:
+              sdds_catalog: ${var.sdds_catalog}
+              sdds_bronze_schema: ${var.sdds_bronze_schema}
+              sdds_silver_schema: ${var.sdds_silver_schema}
+              sdds_gold_schema: ${var.sdds_gold_schema}
+          libraries:
+            - whl: ../../dist/*.whl
           existing_cluster_id: 0812-152951-77vhlhwi
 
           email_notifications:
@@ -184,9 +256,21 @@ resources:
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/gold/flat_values
             source: WORKSPACE
+            base_parameters:
+              sdds_catalog: ${var.sdds_catalog}
+              sdds_bronze_schema: ${var.sdds_bronze_schema}
+              sdds_silver_schema: ${var.sdds_silver_schema}
+              sdds_gold_schema: ${var.sdds_gold_schema}
           environment_key: catalog_load_silver_environment
         - task_key: unpublished_and_deleted_events
           notebook_task:
             notebook_path: ${var.workspace_path_prefix}/src/sdds/sdds_comparison/notebooks/bronze/unpub_and_deleted_events_mysq_bronze
             source: WORKSPACE
+            base_parameters:
+              sdds_catalog: ${var.sdds_catalog}
+              sdds_bronze_schema: ${var.sdds_bronze_schema}
+              sdds_silver_schema: ${var.sdds_silver_schema}
+              sdds_gold_schema: ${var.sdds_gold_schema}
+          libraries:
+            - whl: ../../dist/*.whl
           existing_cluster_id: 0812-152951-77vhlhwi

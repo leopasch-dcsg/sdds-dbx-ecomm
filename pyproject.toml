@@ -1,61 +1,49 @@
 [build-system]
 requires = ["setuptools>=68", "wheel"]
-build-backend= "setuptools.build_meta"
+build-backend = "setuptools.build_meta"
 
 [project]
-name= "ecmde_ecomm"
-description= "A python project for managing ECOMM related medallion layers in Databricks."
+name = "sdds"
+description = "Python utilities and notebooks for the SDDS index comparison Databricks bundle."
 version = "3.9.3"
-requires-python= ">= 3.10"
-dependencies= [
-    "confluent-kafka[avro,schemaregistry]==2.8.0",
-    "elasticsearch==8.17.2",
-    "PyMySQL==1.1.2",
-    "mysql-connector-python==8.3.0",
-    "google-cloud-bigquery==3.25.0"
+requires-python = ">= 3.10"
+dependencies = [
+    "requests",
 ]
 
 [project.urls]
-Homepage = "https://github.com/dsg-tech/ecmde-dbx-ecomm/"
+Homepage = "https://github.com/dsg-tech/sdds-dbx-ecomm/"
 
 [project.optional-dependencies]
 dev = [
     "build",
     "setuptools>=68",
-    "twine",
-    "requests",
     "pytest==8.3",
     "pytest-mock==3.14",
     "coverage>=7.6.0, <8.0.0",
     "black>=24.2, <25.0",
     "flake8>=7.1, <8.0",
     "pre-commit>=3.8, <4.0",
-    "delta-spark==3.2.0",
     "databricks-sdk>=0.38, <0.40.0",
     "pyspark==3.5.4",
     "pandas==2.3.2",
     "pyarrow==21.0.0",
 ]
 
-[project.scripts]
-hash-key = "ecmde_ecomm.common.notebooks.hash_key:main"
-ecomp-bq-egress = "ecmde_ecomm.ecomp.notebooks.bq.ecomp_egress:main"
-search-intelligent-filtering-append = "ecmde_ecomm.search.notebooks.intelligent_filtering_append:main"
-ecmde-ecomp-bq-exec-sproc = "ecmde_ecomm.ecomp.bq.exec_sproc:main"
-
 [tool.setuptools]
 package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["sdds*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-junit_suite_name = "ecmde-ecomm-tests"
+junit_suite_name = "sdds-tests"
 markers = [
     "unit: marks a method or class as a unit test.",
-    "integration: marks a method or class as an integration test."
+    "integration: marks a method or class as an integration test.",
 ]
 
 [tool.coverage.run]

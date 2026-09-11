@@ -59,7 +59,7 @@ targets:
         env: "dev-local"
       trigger_pause_status: PAUSED
     mode: development
-    default: true
+    default: false
     workspace:
       host: https://adb-7098146655993014.14.azuredatabricks.net/
     # variables:
