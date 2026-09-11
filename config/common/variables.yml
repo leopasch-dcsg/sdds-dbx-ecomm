@@ -12,7 +12,7 @@ variables:
     default: /Workspace/Users/${workspace.current_user.userName}/.bundle/sdds-dbx-ecomm/${bundle.target}/files
 
   bundle_version:
-    default: "v3.9.3"
+    default: "v3.10.0"
 
   # The data platform service principal ID is required for control-m orchestration. They need to be able to kick off ou
   data_platform_sp_id:

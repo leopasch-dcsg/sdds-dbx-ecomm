@@ -1,3 +1,17 @@
+# eComm Release v3.10.0 (FY26 Q3)
+The v3.10.0 release productionizes the SDDS index comparison job and reworks the bundle to build under the `sdds` package name.
+
+## Enhancements and Features
+* SDDS Index Comparison job: productionize `sdds_index_comparison` job (bronze → silver → gold pipeline for catalog load, catalog stream, inventory, and gold compare/report tasks). Job runs daily at 04:00:21 America/New_York on the prod workspace.
+* Environment-driven catalog/schema: notebooks now read `sdds_catalog`, `sdds_bronze_schema`, `sdds_silver_schema`, and `sdds_gold_schema` from job `base_parameters` via `NotebookUtil.notebook_param(...)`. Values resolve per deploy target (`dev_sdsc_db` in development, `prod_sdsc_db` in production).
+* `NotebookUtil` helper (`sdds.common.util`): mirrors the mature `ecmde_ecomm` pattern with safe widget reads, defaults, and `text_widget` / `spark_param` helpers.
+* Wheel repackaged under `sdds` name (was `ecmde_ecomm`); notebooks and job tasks reference `sdds.common.util`.
+
+## Fixes
+* Job tasks previously pointing at dev cluster IDs now target the prod clusters (`0812-152951-77vhlhwi` for catalog-load tasks, `0811-215511-4bazq276` for catalog-stream tasks).
+* `flat_blended_comparison_gold` uses the serverless `catalog_load_silver_environment`; its wheel is installed via the environment `dependencies` block instead of task-level `libraries`.
+* `pyproject.toml` cleaned up — dropped unused `ecmde_ecomm`-era dependencies (`confluent-kafka`, `elasticsearch`, `PyMySQL`, `mysql-connector-python`, `google-cloud-bigquery`) and stale `[project.scripts]` entries.
+
 # eComm Release v3.9.3 (FY26 Q2 - Sprint 5)
 The v3.9.3 contains an update to the txn_order_sku watermark timestamp.
 
