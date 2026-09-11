@@ -4,12 +4,12 @@ variables:
   dbx_env:
     default: DEV
   team_code:
-    default: ecmde
+    default: sdsc
   azure_kv_scope:
     default: kv-dsg-ecmde-dbx
 
   workspace_path_prefix:
-    default: /Workspace/Users/${workspace.current_user.userName}/.bundle/ecmde-dbx-ecomm/${bundle.target}/files
+    default: /Workspace/Users/${workspace.current_user.userName}/.bundle/sdds-dbx-ecomm/${bundle.target}/files
 
   bundle_version:
     default: "v3.9.3"

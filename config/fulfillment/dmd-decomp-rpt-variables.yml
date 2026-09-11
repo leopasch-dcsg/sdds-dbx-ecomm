@@ -1,5 +1,0 @@
-variables:
-  dmd_decomp_ecomp_catalog:
-    default: prod_ecmde_db
-  dmd_decomp_ddw_catalog:
-    default: prod_gc_ddw_db

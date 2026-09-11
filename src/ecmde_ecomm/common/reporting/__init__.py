@@ -1,3 +1,0 @@
-RPT_BQ_TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
-RPT_DEFAULT_TIMEZONE = "America/New_York"
-RPT_UTC_TIMEZONE = "UTC"
