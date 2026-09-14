@@ -42,7 +42,7 @@ variables:
     default: "sdds_gold"
 
   sdds_schedule_pause_status:
-    default: "UNPAUSED"
+    default: "PAUSED"
 
   dlt_cluster_policy_id:
     lookup:
